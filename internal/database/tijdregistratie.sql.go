@@ -7,13 +7,16 @@ package database
 
 import (
 	"context"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 const addTimeRegistration = `-- name: AddTimeRegistration :one
 INSERT INTO timeregistration (id, timestamp, date_activity, length_minutes, description, catagory)
 VALUES(
     gen_random_UUID(),
-    NOW,
+    NOW(),
     $1,
     $2,
     $3,
@@ -23,7 +26,7 @@ RETURNING id, timestamp, date_activity, length_minutes, description, catagory
 `
 
 type AddTimeRegistrationParams struct {
-	DateActivity  string
+	DateActivity  time.Time
 	LengthMinutes int32
 	Description   string
 	Catagory      string
@@ -35,6 +38,202 @@ func (q *Queries) AddTimeRegistration(ctx context.Context, arg AddTimeRegistrati
 		arg.LengthMinutes,
 		arg.Description,
 		arg.Catagory,
+	)
+	var i Timeregistration
+	err := row.Scan(
+		&i.ID,
+		&i.Timestamp,
+		&i.DateActivity,
+		&i.LengthMinutes,
+		&i.Description,
+		&i.Catagory,
+	)
+	return i, err
+}
+
+const deleteTime = `-- name: DeleteTime :exec
+DELETE FROM timeregistration
+WHERE id = $1
+`
+
+func (q *Queries) DeleteTime(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteTime, id)
+	return err
+}
+
+const overviewAllTime = `-- name: OverviewAllTime :many
+SELECT id, timestamp, date_activity, length_minutes, description, catagory FROM timeregistration
+`
+
+func (q *Queries) OverviewAllTime(ctx context.Context) ([]Timeregistration, error) {
+	rows, err := q.db.QueryContext(ctx, overviewAllTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Timeregistration
+	for rows.Next() {
+		var i Timeregistration
+		if err := rows.Scan(
+			&i.ID,
+			&i.Timestamp,
+			&i.DateActivity,
+			&i.LengthMinutes,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const overviewTimeMonth = `-- name: OverviewTimeMonth :many
+SELECT id, timestamp, date_activity, length_minutes, description, catagory FROM timeregistration
+WHERE EXTRACT(MONTH FROM date_activity) = $1
+AND EXTRACT(YEAR FROM date_activity) = $2
+`
+
+type OverviewTimeMonthParams struct {
+	DateActivity   time.Time
+	DateActivity_2 time.Time
+}
+
+func (q *Queries) OverviewTimeMonth(ctx context.Context, arg OverviewTimeMonthParams) ([]Timeregistration, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTimeMonth, arg.DateActivity, arg.DateActivity_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Timeregistration
+	for rows.Next() {
+		var i Timeregistration
+		if err := rows.Scan(
+			&i.ID,
+			&i.Timestamp,
+			&i.DateActivity,
+			&i.LengthMinutes,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const overviewTimeYear = `-- name: OverviewTimeYear :many
+SELECT id, timestamp, date_activity, length_minutes, description, catagory FROM timeregistration
+WHERE EXTRACT(YEAR FROM date_activity) = $1
+`
+
+func (q *Queries) OverviewTimeYear(ctx context.Context, dateActivity time.Time) ([]Timeregistration, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTimeYear, dateActivity)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Timeregistration
+	for rows.Next() {
+		var i Timeregistration
+		if err := rows.Scan(
+			&i.ID,
+			&i.Timestamp,
+			&i.DateActivity,
+			&i.LengthMinutes,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const resetTimeRegistration = `-- name: ResetTimeRegistration :exec
+DELETE FROM timeregistration
+`
+
+func (q *Queries) ResetTimeRegistration(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetTimeRegistration)
+	return err
+}
+
+const totalTimeMonth = `-- name: TotalTimeMonth :one
+SELECT sum(length_minutes/60.0)
+FROM timeregistration
+WHERE EXTRACT(MONTH FROM date_activity) = $1
+AND EXTRACT(YEAR FROM date_activity) = $2
+`
+
+type TotalTimeMonthParams struct {
+	DateActivity   time.Time
+	DateActivity_2 time.Time
+}
+
+func (q *Queries) TotalTimeMonth(ctx context.Context, arg TotalTimeMonthParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalTimeMonth, arg.DateActivity, arg.DateActivity_2)
+	var sum int64
+	err := row.Scan(&sum)
+	return sum, err
+}
+
+const totalTimeYear = `-- name: TotalTimeYear :one
+SELECT sum(length_minutes/60.0)
+FROM timeregistration
+WHERE EXTRACT(YEAR FROM date_activity) = $1
+`
+
+func (q *Queries) TotalTimeYear(ctx context.Context, dateActivity time.Time) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalTimeYear, dateActivity)
+	var sum int64
+	err := row.Scan(&sum)
+	return sum, err
+}
+
+const updateTime = `-- name: UpdateTime :one
+UPDATE timeregistration
+SET date_activity = $1, length_minutes = $2, description = $3, catagory = $4
+WHERE id = $5
+RETURNING id, timestamp, date_activity, length_minutes, description, catagory
+`
+
+type UpdateTimeParams struct {
+	DateActivity  time.Time
+	LengthMinutes int32
+	Description   string
+	Catagory      string
+	ID            uuid.UUID
+}
+
+func (q *Queries) UpdateTime(ctx context.Context, arg UpdateTimeParams) (Timeregistration, error) {
+	row := q.db.QueryRowContext(ctx, updateTime,
+		arg.DateActivity,
+		arg.LengthMinutes,
+		arg.Description,
+		arg.Catagory,
+		arg.ID,
 	)
 	var i Timeregistration
 	err := row.Scan(

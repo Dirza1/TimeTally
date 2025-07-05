@@ -5,7 +5,6 @@
 package database
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,9 +13,9 @@ import (
 type Finance struct {
 	ID              uuid.UUID
 	Timestamp       time.Time
-	DateTransaction string
+	DateTransaction time.Time
 	AmmountCent     int32
-	Type            sql.NullString
+	Type            string
 	Description     string
 	Catagory        string
 }
@@ -24,7 +23,7 @@ type Finance struct {
 type Timeregistration struct {
 	ID            uuid.UUID
 	Timestamp     time.Time
-	DateActivity  string
+	DateActivity  time.Time
 	LengthMinutes int32
 	Description   string
 	Catagory      string

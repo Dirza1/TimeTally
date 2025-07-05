@@ -7,7 +7,7 @@ package database
 
 import (
 	"context"
-	"database/sql"
+	"time"
 )
 
 const addTransaction = `-- name: AddTransaction :one
@@ -25,9 +25,9 @@ RETURNING id, timestamp, date_transaction, ammount_cent, type, description, cata
 `
 
 type AddTransactionParams struct {
-	DateTransaction string
+	DateTransaction time.Time
 	AmmountCent     int32
-	Type            sql.NullString
+	Type            string
 	Description     string
 	Catagory        string
 }
