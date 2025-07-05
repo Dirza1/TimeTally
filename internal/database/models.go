@@ -5,6 +5,7 @@
 package database
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,7 +16,7 @@ type Finance struct {
 	Timestamp       time.Time
 	DateTransaction string
 	AmmountCent     int32
-	Type            string
+	Type            sql.NullString
 	Description     string
 	Catagory        string
 }
