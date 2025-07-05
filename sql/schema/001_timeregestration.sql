@@ -13,7 +13,7 @@ CREATE TABLE finances(
     timestamp TIMESTAMP NOT NULL,
     date_transaction TEXT NOT NULL,
     ammount_cent INTEGER NOT NULL,
-    type TEXT CHECK (type IN ('in', 'uit')),
+    type TEXT NOT NULL,
     description TEXT NOT NULL,
     catagory TEXT NOT NULL
 );
