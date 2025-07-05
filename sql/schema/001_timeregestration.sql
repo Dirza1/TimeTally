@@ -1,21 +1,23 @@
 -- +goose Up
-CREATE TABLE tijdregistratie(
+CREATE TABLE timeregistration(
     id UUID PRIMARY KEY,
-    tijd TIMESTAMP NOT NULL,
-    lengte_minuten integer NOT NULL,
-    beschrijving TEXT NOT NULL,
-    catagorie TEXT NOT NULL
+    timestamp TIMESTAMP NOT NULL,
+    date_activity TEXT NOT NULL,
+    length_minutes integer NOT NULL,
+    description TEXT NOT NULL,
+    catagory TEXT NOT NULL
 );
 
-CREATE TABLE financien(
+CREATE TABLE finances(
     id UUID PRIMARY KEY,
-    tijdregistratie TIMESTAMP NOT NULL,
-    bedrag_cent INTEGER NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    date_transaction TEXT NOT NULL,
+    ammount_cent INTEGER NOT NULL,
     type TEXT NOT NULL,
-    beschrijving TEXT NOT NULL,
-    catagorie TEXT NOT NULL
+    description TEXT NOT NULL,
+    catagory TEXT NOT NULL
 );
 
 -- +goose Down
-DROP TABLE financien
-DROP TABLE tijdregistratie;
+DROP TABLE finances;
+DROP TABLE timeregistration;
