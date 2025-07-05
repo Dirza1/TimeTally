@@ -8,6 +8,8 @@ package database
 import (
 	"context"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const addTransaction = `-- name: AddTransaction :one
@@ -39,6 +41,262 @@ func (q *Queries) AddTransaction(ctx context.Context, arg AddTransactionParams) 
 		arg.Type,
 		arg.Description,
 		arg.Catagory,
+	)
+	var i Finance
+	err := row.Scan(
+		&i.ID,
+		&i.Timestamp,
+		&i.DateTransaction,
+		&i.AmmountCent,
+		&i.Type,
+		&i.Description,
+		&i.Catagory,
+	)
+	return i, err
+}
+
+const deleteTransaction = `-- name: DeleteTransaction :exec
+DELETE FROM finances
+WHERE id = $1
+`
+
+func (q *Queries) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteTransaction, id)
+	return err
+}
+
+const overviewAllTransactions = `-- name: OverviewAllTransactions :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    ammount_cent / 100.0 AS "Amount",
+    type,
+    description,
+    catagory
+ FROM finances
+`
+
+type OverviewAllTransactionsRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateTransaction  time.Time
+	Amount           int32
+	Type             string
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewAllTransactions(ctx context.Context) ([]OverviewAllTransactionsRow, error) {
+	rows, err := q.db.QueryContext(ctx, overviewAllTransactions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OverviewAllTransactionsRow
+	for rows.Next() {
+		var i OverviewAllTransactionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RegistrationTime,
+			&i.DateTransaction,
+			&i.Amount,
+			&i.Type,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const overviewTransactionYear = `-- name: OverviewTransactionYear :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    ammount_cent / 100.0 AS "Amount",
+    type,
+    description,
+    catagory
+FROM finances
+WHERE EXTRACT(YEAR FROM date_transaction) = $1
+`
+
+type OverviewTransactionYearRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateTransaction  time.Time
+	Amount           int32
+	Type             string
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewTransactionYear(ctx context.Context, dateTransaction time.Time) ([]OverviewTransactionYearRow, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTransactionYear, dateTransaction)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OverviewTransactionYearRow
+	for rows.Next() {
+		var i OverviewTransactionYearRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RegistrationTime,
+			&i.DateTransaction,
+			&i.Amount,
+			&i.Type,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const overviewTransactionsMonth = `-- name: OverviewTransactionsMonth :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    ammount_cent / 100.0 AS "Amount",
+    type,
+    description,
+    catagory
+FROM finances
+WHERE EXTRACT(MONTH FROM date_transaction) = $1
+AND EXTRACT(YEAR FROM date_transaction) = $2
+`
+
+type OverviewTransactionsMonthParams struct {
+	DateTransaction   time.Time
+	DateTransaction_2 time.Time
+}
+
+type OverviewTransactionsMonthRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateTransaction  time.Time
+	Amount           int32
+	Type             string
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewTransactionsMonth(ctx context.Context, arg OverviewTransactionsMonthParams) ([]OverviewTransactionsMonthRow, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTransactionsMonth, arg.DateTransaction, arg.DateTransaction_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OverviewTransactionsMonthRow
+	for rows.Next() {
+		var i OverviewTransactionsMonthRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RegistrationTime,
+			&i.DateTransaction,
+			&i.Amount,
+			&i.Type,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const resetTransaction = `-- name: ResetTransaction :exec
+DELETE from finances
+`
+
+func (q *Queries) ResetTransaction(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetTransaction)
+	return err
+}
+
+const totalTransactionsMonth = `-- name: TotalTransactionsMonth :one
+SELECT sum(ammount_cent/100.0)
+FROM finances
+WHERE EXTRACT(MONTH FROM date_transaction) = $1
+AND EXTRACT(YEAR FROM date_transaction) = $2
+`
+
+type TotalTransactionsMonthParams struct {
+	DateTransaction   time.Time
+	DateTransaction_2 time.Time
+}
+
+func (q *Queries) TotalTransactionsMonth(ctx context.Context, arg TotalTransactionsMonthParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalTransactionsMonth, arg.DateTransaction, arg.DateTransaction_2)
+	var sum int64
+	err := row.Scan(&sum)
+	return sum, err
+}
+
+const totalTransactionsYear = `-- name: TotalTransactionsYear :one
+SELECT sum(length_minutes/100.0)
+FROM finances
+WHERE EXTRACT(YEAR FROM date_transaction) = $1
+`
+
+func (q *Queries) TotalTransactionsYear(ctx context.Context, dateTransaction time.Time) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalTransactionsYear, dateTransaction)
+	var sum int64
+	err := row.Scan(&sum)
+	return sum, err
+}
+
+const updateTransaction = `-- name: UpdateTransaction :one
+UPDATE finances
+SET date_transaction = $1, ammount_cent = $2, type = $3, description = $4, catagory = $5
+WHERE id = $6
+RETURNING id, timestamp, date_transaction, ammount_cent, type, description, catagory
+`
+
+type UpdateTransactionParams struct {
+	DateTransaction time.Time
+	AmmountCent     int32
+	Type            string
+	Description     string
+	Catagory        string
+	ID              uuid.UUID
+}
+
+func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (Finance, error) {
+	row := q.db.QueryRowContext(ctx, updateTransaction,
+		arg.DateTransaction,
+		arg.AmmountCent,
+		arg.Type,
+		arg.Description,
+		arg.Catagory,
+		arg.ID,
 	)
 	var i Finance
 	err := row.Scan(

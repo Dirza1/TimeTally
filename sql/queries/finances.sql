@@ -10,3 +10,63 @@ VALUES(
     $5
 )
 RETURNING *;
+
+-- name: ResetTransaction :exec
+DELETE from finances;
+
+-- name: OverviewAllTransactions :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    ammount_cent / 100.0 AS "Amount",
+    type,
+    description,
+    catagory
+ FROM finances;
+
+-- name: OverviewTransactionsMonth :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    ammount_cent / 100.0 AS "Amount",
+    type,
+    description,
+    catagory
+FROM finances
+WHERE EXTRACT(MONTH FROM date_transaction) = $1
+AND EXTRACT(YEAR FROM date_transaction) = $2;
+
+-- name: OverviewTransactionYear :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    ammount_cent / 100.0 AS "Amount",
+    type,
+    description,
+    catagory
+FROM finances
+WHERE EXTRACT(YEAR FROM date_transaction) = $1;
+
+-- name: TotalTransactionsMonth :one
+SELECT sum(ammount_cent/100.0)
+FROM finances
+WHERE EXTRACT(MONTH FROM date_transaction) = $1
+AND EXTRACT(YEAR FROM date_transaction) = $2;
+
+-- name: TotalTransactionsYear :one
+SELECT sum(length_minutes/100.0)
+FROM finances
+WHERE EXTRACT(YEAR FROM date_transaction) = $1;
+
+-- name: DeleteTransaction :exec
+DELETE FROM finances
+WHERE id = $1;
+
+-- name: UpdateTransaction :one
+UPDATE finances
+SET date_transaction = $1, ammount_cent = $2, type = $3, description = $4, catagory = $5
+WHERE id = $6
+RETURNING *;

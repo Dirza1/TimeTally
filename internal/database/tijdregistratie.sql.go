@@ -62,23 +62,39 @@ func (q *Queries) DeleteTime(ctx context.Context, id uuid.UUID) error {
 }
 
 const overviewAllTime = `-- name: OverviewAllTime :many
-SELECT id, timestamp, date_activity, length_minutes, description, catagory FROM timeregistration
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    length_minutes / 60.0 AS "Time(hours)",
+    description,
+    catagory
+FROM timeregistration
 `
 
-func (q *Queries) OverviewAllTime(ctx context.Context) ([]Timeregistration, error) {
+type OverviewAllTimeRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateActivity     time.Time
+	TimeHours        int32
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewAllTime(ctx context.Context) ([]OverviewAllTimeRow, error) {
 	rows, err := q.db.QueryContext(ctx, overviewAllTime)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Timeregistration
+	var items []OverviewAllTimeRow
 	for rows.Next() {
-		var i Timeregistration
+		var i OverviewAllTimeRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.Timestamp,
+			&i.RegistrationTime,
 			&i.DateActivity,
-			&i.LengthMinutes,
+			&i.TimeHours,
 			&i.Description,
 			&i.Catagory,
 		); err != nil {
@@ -96,7 +112,14 @@ func (q *Queries) OverviewAllTime(ctx context.Context) ([]Timeregistration, erro
 }
 
 const overviewTimeMonth = `-- name: OverviewTimeMonth :many
-SELECT id, timestamp, date_activity, length_minutes, description, catagory FROM timeregistration
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    length_minutes / 60.0 AS "Time(hours)",
+    description,
+    catagory
+FROM timeregistration
 WHERE EXTRACT(MONTH FROM date_activity) = $1
 AND EXTRACT(YEAR FROM date_activity) = $2
 `
@@ -106,20 +129,29 @@ type OverviewTimeMonthParams struct {
 	DateActivity_2 time.Time
 }
 
-func (q *Queries) OverviewTimeMonth(ctx context.Context, arg OverviewTimeMonthParams) ([]Timeregistration, error) {
+type OverviewTimeMonthRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateActivity     time.Time
+	TimeHours        int32
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewTimeMonth(ctx context.Context, arg OverviewTimeMonthParams) ([]OverviewTimeMonthRow, error) {
 	rows, err := q.db.QueryContext(ctx, overviewTimeMonth, arg.DateActivity, arg.DateActivity_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Timeregistration
+	var items []OverviewTimeMonthRow
 	for rows.Next() {
-		var i Timeregistration
+		var i OverviewTimeMonthRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.Timestamp,
+			&i.RegistrationTime,
 			&i.DateActivity,
-			&i.LengthMinutes,
+			&i.TimeHours,
 			&i.Description,
 			&i.Catagory,
 		); err != nil {
@@ -137,24 +169,40 @@ func (q *Queries) OverviewTimeMonth(ctx context.Context, arg OverviewTimeMonthPa
 }
 
 const overviewTimeYear = `-- name: OverviewTimeYear :many
-SELECT id, timestamp, date_activity, length_minutes, description, catagory FROM timeregistration
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    length_minutes / 60.0 AS "Time(hours)",
+    description,
+    catagory
+FROM timeregistration
 WHERE EXTRACT(YEAR FROM date_activity) = $1
 `
 
-func (q *Queries) OverviewTimeYear(ctx context.Context, dateActivity time.Time) ([]Timeregistration, error) {
+type OverviewTimeYearRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateActivity     time.Time
+	TimeHours        int32
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewTimeYear(ctx context.Context, dateActivity time.Time) ([]OverviewTimeYearRow, error) {
 	rows, err := q.db.QueryContext(ctx, overviewTimeYear, dateActivity)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Timeregistration
+	var items []OverviewTimeYearRow
 	for rows.Next() {
-		var i Timeregistration
+		var i OverviewTimeYearRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.Timestamp,
+			&i.RegistrationTime,
 			&i.DateActivity,
-			&i.LengthMinutes,
+			&i.TimeHours,
 			&i.Description,
 			&i.Catagory,
 		); err != nil {

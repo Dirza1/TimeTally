@@ -14,15 +14,36 @@ RETURNING *;
 DELETE FROM timeregistration;
 
 -- name: OverviewAllTime :many
-SELECT * FROM timeregistration;
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    length_minutes / 60.0 AS "Time(hours)",
+    description,
+    catagory
+FROM timeregistration;
 
 -- name: OverviewTimeMonth :many
-SELECT * FROM timeregistration
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    length_minutes / 60.0 AS "Time(hours)",
+    description,
+    catagory
+FROM timeregistration
 WHERE EXTRACT(MONTH FROM date_activity) = $1
 AND EXTRACT(YEAR FROM date_activity) = $2;
 
 -- name: OverviewTimeYear :many
-SELECT * FROM timeregistration
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    length_minutes / 60.0 AS "Time(hours)",
+    description,
+    catagory
+FROM timeregistration
 WHERE EXTRACT(YEAR FROM date_activity) = $1;
 
 -- name: TotalTimeMonth :one
