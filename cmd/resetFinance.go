@@ -1,16 +1,15 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+Copyright © 2025 Jasper Olthof-Donker <jasper.olthof@xs4all.nl>
 */
 package cmd
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/Dirza1/Time-and-expence-registration/internal/database"
+	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/spf13/cobra"
@@ -36,13 +35,8 @@ var resetFinanceCmd = &cobra.Command{
 			fmt.Println("Wrong password")
 			return
 		} else {
-			dbURL := os.Getenv("DB_URL")
-			dbConn, err := sql.Open("postgres", dbURL)
-			if err != nil {
-				log.Fatal("Datbase error:", err)
-			}
-			queries := database.New(dbConn)
-			err = queries.ResetTransaction(context.Background())
+			queries := utils.DatabaseConnection()
+			err := queries.ResetTransaction(context.Background())
 			if err != nil {
 				log.Fatal("error during reset: ", err)
 			}
