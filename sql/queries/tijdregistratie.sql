@@ -23,7 +23,7 @@ SELECT
     catagory
 FROM timeregistration;
 
--- name: OverviewTimeMonth :many
+-- name: OverviewTimeDates :many
 SELECT 
     id,
     timestamp AS "Registration Time",
@@ -32,30 +32,12 @@ SELECT
     description,
     catagory
 FROM timeregistration
-WHERE EXTRACT(MONTH FROM date_activity) = $1
-AND EXTRACT(YEAR FROM date_activity) = $2;
+WHERE date_activity >= $1 AND date_activity <= $2;
 
--- name: OverviewTimeYear :many
-SELECT 
-    id,
-    timestamp AS "Registration Time",
-    date_activity AS "Date Activity",
-    length_minutes / 60.0 AS "Time(hours)",
-    description,
-    catagory
-FROM timeregistration
-WHERE EXTRACT(YEAR FROM date_activity) = $1;
-
--- name: TotalTimeMonth :one
+-- name: TotalTimeDates :one
 SELECT sum(length_minutes/60.0)
 FROM timeregistration
-WHERE EXTRACT(MONTH FROM date_activity) = $1
-AND EXTRACT(YEAR FROM date_activity) = $2;
-
--- name: TotalTimeYear :one
-SELECT sum(length_minutes/60.0)
-FROM timeregistration
-WHERE EXTRACT(YEAR FROM date_activity) = $1;
+WHERE date_activity >= $1 AND date_activity <= $2;
 
 -- name: DeleteTime :exec
 DELETE FROM timeregistration

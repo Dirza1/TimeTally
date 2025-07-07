@@ -25,7 +25,7 @@ SELECT
     catagory
  FROM finances;
 
--- name: OverviewTransactionsMonth :many
+-- name: OverviewTransactionsDate :many
 SELECT 
     id,
     timestamp AS "Registration Time",
@@ -35,31 +35,12 @@ SELECT
     description,
     catagory
 FROM finances
-WHERE EXTRACT(MONTH FROM date_transaction) = $1
-AND EXTRACT(YEAR FROM date_transaction) = $2;
+WHERE date_transaction >= $1 AND date_transaction <= $2;
 
--- name: OverviewTransactionYear :many
-SELECT 
-    id,
-    timestamp AS "Registration Time",
-    date_transaction AS "Date Transaction",
-    ammount_cent / 100.0 AS "Amount",
-    type,
-    description,
-    catagory
-FROM finances
-WHERE EXTRACT(YEAR FROM date_transaction) = $1;
-
--- name: TotalTransactionsMonth :one
+-- name: TotalTransactionsDates :one
 SELECT sum(ammount_cent/100.0)
 FROM finances
-WHERE EXTRACT(MONTH FROM date_transaction) = $1
-AND EXTRACT(YEAR FROM date_transaction) = $2;
-
--- name: TotalTransactionsYear :one
-SELECT sum(length_minutes/100.0)
-FROM finances
-WHERE EXTRACT(YEAR FROM date_transaction) = $1;
+WHERE date_transaction >= $1 AND date_transaction <= $2;
 
 -- name: DeleteTransaction :exec
 DELETE FROM finances

@@ -111,7 +111,7 @@ func (q *Queries) OverviewAllTime(ctx context.Context) ([]OverviewAllTimeRow, er
 	return items, nil
 }
 
-const overviewTimeMonth = `-- name: OverviewTimeMonth :many
+const overviewTimeDates = `-- name: OverviewTimeDates :many
 SELECT 
     id,
     timestamp AS "Registration Time",
@@ -120,16 +120,15 @@ SELECT
     description,
     catagory
 FROM timeregistration
-WHERE EXTRACT(MONTH FROM date_activity) = $1
-AND EXTRACT(YEAR FROM date_activity) = $2
+WHERE date_activity >= $1 AND date_activity <= $2
 `
 
-type OverviewTimeMonthParams struct {
+type OverviewTimeDatesParams struct {
 	DateActivity   time.Time
 	DateActivity_2 time.Time
 }
 
-type OverviewTimeMonthRow struct {
+type OverviewTimeDatesRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateActivity     time.Time
@@ -138,66 +137,15 @@ type OverviewTimeMonthRow struct {
 	Catagory         string
 }
 
-func (q *Queries) OverviewTimeMonth(ctx context.Context, arg OverviewTimeMonthParams) ([]OverviewTimeMonthRow, error) {
-	rows, err := q.db.QueryContext(ctx, overviewTimeMonth, arg.DateActivity, arg.DateActivity_2)
+func (q *Queries) OverviewTimeDates(ctx context.Context, arg OverviewTimeDatesParams) ([]OverviewTimeDatesRow, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTimeDates, arg.DateActivity, arg.DateActivity_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OverviewTimeMonthRow
+	var items []OverviewTimeDatesRow
 	for rows.Next() {
-		var i OverviewTimeMonthRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.RegistrationTime,
-			&i.DateActivity,
-			&i.TimeHours,
-			&i.Description,
-			&i.Catagory,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const overviewTimeYear = `-- name: OverviewTimeYear :many
-SELECT 
-    id,
-    timestamp AS "Registration Time",
-    date_activity AS "Date Activity",
-    length_minutes / 60.0 AS "Time(hours)",
-    description,
-    catagory
-FROM timeregistration
-WHERE EXTRACT(YEAR FROM date_activity) = $1
-`
-
-type OverviewTimeYearRow struct {
-	ID               uuid.UUID
-	RegistrationTime time.Time
-	DateActivity     time.Time
-	TimeHours        int32
-	Description      string
-	Catagory         string
-}
-
-func (q *Queries) OverviewTimeYear(ctx context.Context, dateActivity time.Time) ([]OverviewTimeYearRow, error) {
-	rows, err := q.db.QueryContext(ctx, overviewTimeYear, dateActivity)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []OverviewTimeYearRow
-	for rows.Next() {
-		var i OverviewTimeYearRow
+		var i OverviewTimeDatesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.RegistrationTime,
@@ -228,33 +176,19 @@ func (q *Queries) ResetTimeRegistration(ctx context.Context) error {
 	return err
 }
 
-const totalTimeMonth = `-- name: TotalTimeMonth :one
+const totalTimeDates = `-- name: TotalTimeDates :one
 SELECT sum(length_minutes/60.0)
 FROM timeregistration
-WHERE EXTRACT(MONTH FROM date_activity) = $1
-AND EXTRACT(YEAR FROM date_activity) = $2
+WHERE date_activity >= $1 AND date_activity <= $2
 `
 
-type TotalTimeMonthParams struct {
+type TotalTimeDatesParams struct {
 	DateActivity   time.Time
 	DateActivity_2 time.Time
 }
 
-func (q *Queries) TotalTimeMonth(ctx context.Context, arg TotalTimeMonthParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, totalTimeMonth, arg.DateActivity, arg.DateActivity_2)
-	var sum int64
-	err := row.Scan(&sum)
-	return sum, err
-}
-
-const totalTimeYear = `-- name: TotalTimeYear :one
-SELECT sum(length_minutes/60.0)
-FROM timeregistration
-WHERE EXTRACT(YEAR FROM date_activity) = $1
-`
-
-func (q *Queries) TotalTimeYear(ctx context.Context, dateActivity time.Time) (int64, error) {
-	row := q.db.QueryRowContext(ctx, totalTimeYear, dateActivity)
+func (q *Queries) TotalTimeDates(ctx context.Context, arg TotalTimeDatesParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalTimeDates, arg.DateActivity, arg.DateActivity_2)
 	var sum int64
 	err := row.Scan(&sum)
 	return sum, err

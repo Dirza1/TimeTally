@@ -118,7 +118,7 @@ func (q *Queries) OverviewAllTransactions(ctx context.Context) ([]OverviewAllTra
 	return items, nil
 }
 
-const overviewTransactionYear = `-- name: OverviewTransactionYear :many
+const overviewTransactionsDate = `-- name: OverviewTransactionsDate :many
 SELECT 
     id,
     timestamp AS "Registration Time",
@@ -128,70 +128,15 @@ SELECT
     description,
     catagory
 FROM finances
-WHERE EXTRACT(YEAR FROM date_transaction) = $1
+WHERE date_transaction >= $1 AND date_transaction <= $2
 `
 
-type OverviewTransactionYearRow struct {
-	ID               uuid.UUID
-	RegistrationTime time.Time
-	DateTransaction  time.Time
-	Amount           int32
-	Type             string
-	Description      string
-	Catagory         string
-}
-
-func (q *Queries) OverviewTransactionYear(ctx context.Context, dateTransaction time.Time) ([]OverviewTransactionYearRow, error) {
-	rows, err := q.db.QueryContext(ctx, overviewTransactionYear, dateTransaction)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []OverviewTransactionYearRow
-	for rows.Next() {
-		var i OverviewTransactionYearRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.RegistrationTime,
-			&i.DateTransaction,
-			&i.Amount,
-			&i.Type,
-			&i.Description,
-			&i.Catagory,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const overviewTransactionsMonth = `-- name: OverviewTransactionsMonth :many
-SELECT 
-    id,
-    timestamp AS "Registration Time",
-    date_transaction AS "Date Transaction",
-    ammount_cent / 100.0 AS "Amount",
-    type,
-    description,
-    catagory
-FROM finances
-WHERE EXTRACT(MONTH FROM date_transaction) = $1
-AND EXTRACT(YEAR FROM date_transaction) = $2
-`
-
-type OverviewTransactionsMonthParams struct {
+type OverviewTransactionsDateParams struct {
 	DateTransaction   time.Time
 	DateTransaction_2 time.Time
 }
 
-type OverviewTransactionsMonthRow struct {
+type OverviewTransactionsDateRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateTransaction  time.Time
@@ -201,15 +146,15 @@ type OverviewTransactionsMonthRow struct {
 	Catagory         string
 }
 
-func (q *Queries) OverviewTransactionsMonth(ctx context.Context, arg OverviewTransactionsMonthParams) ([]OverviewTransactionsMonthRow, error) {
-	rows, err := q.db.QueryContext(ctx, overviewTransactionsMonth, arg.DateTransaction, arg.DateTransaction_2)
+func (q *Queries) OverviewTransactionsDate(ctx context.Context, arg OverviewTransactionsDateParams) ([]OverviewTransactionsDateRow, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTransactionsDate, arg.DateTransaction, arg.DateTransaction_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []OverviewTransactionsMonthRow
+	var items []OverviewTransactionsDateRow
 	for rows.Next() {
-		var i OverviewTransactionsMonthRow
+		var i OverviewTransactionsDateRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.RegistrationTime,
@@ -241,33 +186,19 @@ func (q *Queries) ResetTransaction(ctx context.Context) error {
 	return err
 }
 
-const totalTransactionsMonth = `-- name: TotalTransactionsMonth :one
+const totalTransactionsDates = `-- name: TotalTransactionsDates :one
 SELECT sum(ammount_cent/100.0)
 FROM finances
-WHERE EXTRACT(MONTH FROM date_transaction) = $1
-AND EXTRACT(YEAR FROM date_transaction) = $2
+WHERE date_transaction >= $1 AND date_transaction <= $2
 `
 
-type TotalTransactionsMonthParams struct {
+type TotalTransactionsDatesParams struct {
 	DateTransaction   time.Time
 	DateTransaction_2 time.Time
 }
 
-func (q *Queries) TotalTransactionsMonth(ctx context.Context, arg TotalTransactionsMonthParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, totalTransactionsMonth, arg.DateTransaction, arg.DateTransaction_2)
-	var sum int64
-	err := row.Scan(&sum)
-	return sum, err
-}
-
-const totalTransactionsYear = `-- name: TotalTransactionsYear :one
-SELECT sum(length_minutes/100.0)
-FROM finances
-WHERE EXTRACT(YEAR FROM date_transaction) = $1
-`
-
-func (q *Queries) TotalTransactionsYear(ctx context.Context, dateTransaction time.Time) (int64, error) {
-	row := q.db.QueryRowContext(ctx, totalTransactionsYear, dateTransaction)
+func (q *Queries) TotalTransactionsDates(ctx context.Context, arg TotalTransactionsDatesParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalTransactionsDates, arg.DateTransaction, arg.DateTransaction_2)
 	var sum int64
 	err := row.Scan(&sum)
 	return sum, err
