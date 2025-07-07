@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,9 @@ to quickly create a Cobra application.`,
 
 		switch OverviewMonthType {
 		case "Finance":
-
+			money := database.OverviewTransactionsMonthParams{
+				DateTransaction: OverviewMonthMonth,
+			}
 		case "Time":
 
 		case "All":
