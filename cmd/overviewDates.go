@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -29,17 +28,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		layout := "02-01-2006"
-		firstDate, err := time.Parse(layout, OverviewDatesFirstDate)
+		firstDate := utils.TimeParse(OverviewDatesFirstDate)
 		querry := utils.DatabaseConnection()
-		if err != nil {
-			log.Fatal("Issue with parsing first date: ", err)
-		}
 
-		secondDate, err := time.Parse(layout, OverviewDatesFirstDate)
-		if err != nil {
-			log.Fatal("Issue with parsing second date: ", err)
-		}
+		secondDate := utils.TimeParse(OverviewDatesSecondDate)
+
 		money := database.OverviewTransactionsDateParams{}
 		time := database.OverviewTimeDatesParams{}
 		switch OverviewDatesType {

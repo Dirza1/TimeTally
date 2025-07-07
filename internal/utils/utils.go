@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/joho/godotenv"
@@ -22,4 +23,13 @@ func DatabaseConnection() database.Queries {
 	}
 	queries := database.New(dbConn)
 	return *queries
+}
+
+func TimeParse(toParseDate string) time.Time {
+	layout := "02-01-2006"
+	Date, err := time.Parse(layout, toParseDate)
+	if err != nil {
+		log.Fatal("error during parsing of dates: ", err)
+	}
+	return Date
 }
