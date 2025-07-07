@@ -18,7 +18,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_activity AS "Date Activity",
-    length_minutes::FLOAT8 / 60 AS time_hours,
+    CAST(length_minutes AS FLOAT8) / 60 AS time_hours,
     description,
     catagory
 FROM timeregistration;
