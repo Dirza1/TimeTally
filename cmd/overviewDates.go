@@ -4,11 +4,13 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
+	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +29,9 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		layout := "01Januray2025"
+		layout := "02-01-2006"
 		firstDate, err := time.Parse(layout, OverviewDatesFirstDate)
+		querry := utils.DatabaseConnection()
 		if err != nil {
 			log.Fatal("Issue with parsing first date: ", err)
 		}
@@ -45,26 +48,31 @@ to quickly create a Cobra application.`,
 				DateTransaction:   firstDate,
 				DateTransaction_2: secondDate,
 			}
+			fmt.Println("Overview op financial databse:")
+			fmt.Println(querry.OverviewTransactionsDate(context.Background(), money))
 		case "Time":
 			time = database.OverviewTimeDatesParams{
 				DateActivity:   firstDate,
 				DateActivity_2: secondDate,
 			}
+			fmt.Println("Overview op timeregistration databse:")
+			fmt.Println(querry.OverviewTimeDates(context.Background(), time))
 		case "All":
 			money = database.OverviewTransactionsDateParams{
 				DateTransaction:   firstDate,
 				DateTransaction_2: secondDate,
 			}
+			fmt.Println("Overview op financial databse:")
+			fmt.Println(querry.OverviewTransactionsDate(context.Background(), money))
 			time = database.OverviewTimeDatesParams{
 				DateActivity:   firstDate,
 				DateActivity_2: secondDate,
 			}
+			fmt.Println("Overview op timeregistration databse:")
+			fmt.Println(querry.OverviewTimeDates(context.Background(), time))
 		default:
 			log.Fatal("Incorrect use of the type flag. Use Finance, Time or All. Pay mind to the capitalation.")
 		}
-
-		fmt.Println("overviewMonth called")
-		fmt.Printf("%s, %s", money, time)
 	},
 }
 
@@ -74,10 +82,10 @@ func init() {
 	overviewDatesCmd.Flags().StringVarP(&OverviewDatesType, "type", "t", "all", "Flag to specify the database to querry. Use Finance, Time or All after the flag")
 	overviewDatesCmd.MarkFlagRequired("type")
 
-	overviewDatesCmd.Flags().StringVarP(&OverviewDatesFirstDate, "First-Date", "f", "", "Flag to specify the first date to querry. Use full date notateion. e.g. 01 January 2025")
+	overviewDatesCmd.Flags().StringVarP(&OverviewDatesFirstDate, "First-Date", "f", "", "Flag to specify the first date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
 	overviewDatesCmd.MarkFlagRequired("month")
 
-	overviewDatesCmd.Flags().StringVarP(&OverviewDatesSecondDate, "Second-Date", "s", "", "Flag to specify the second date to querry. Use full date notateion. e.g. 01 January 2025")
+	overviewDatesCmd.Flags().StringVarP(&OverviewDatesSecondDate, "Second-Date", "s", "", "Flag to specify the second date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
 	overviewDatesCmd.MarkFlagRequired("year")
 
 	// Here you will define your flags and configuration settings.
