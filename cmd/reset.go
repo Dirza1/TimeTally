@@ -15,9 +15,9 @@ import (
 )
 
 // resetCmd represents the reset command
-var Type string
-var Confirm bool
-var Password string
+var ResetType string
+var ResetConfirm bool
+var ResetPassword string
 
 var resetCmd = &cobra.Command{
 	Use:   "reset",
@@ -25,18 +25,18 @@ var resetCmd = &cobra.Command{
 	Long: `This command removes all data from the finance and or timeregistration database.
 	NOTE: This is a permenant action. The data will be lost and if there are no backups the data will be lost!
 	Execution of this command requires an additional password to protect against axidental use.
-	Additionaly this comman uses 3 required flags for the database to be deleted, confirming to delete and the password.`,
+	Additionaly this command uses 3 required flags for the database to be deleted, confirming to delete and the password.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if Confirm != true {
+		if ResetConfirm != true {
 			log.Fatal("Confirm flag not set correctly.")
 		}
 		godotenv.Load(".env")
 		setPasword := os.Getenv("reset_password")
-		if setPasword != Password {
+		if setPasword != ResetPassword {
 			log.Fatal("Incorrect password supplied")
 		}
 		queries := utils.DatabaseConnection()
-		switch Type {
+		switch ResetType {
 		case "Finance":
 			err := queries.ResetTransaction(context.Background())
 			if err != nil {
@@ -68,13 +68,13 @@ var resetCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(resetCmd)
 
-	resetCmd.Flags().StringVarP(&Type, "type", "t", "all", "Used to diferenciate which database needs to be deleted. Use Finance, Time or all as input. (required)")
+	resetCmd.Flags().StringVarP(&ResetType, "type", "t", "all", "Used to diferenciate which database needs to be deleted. Use Finance, Time or all as input. (required)")
 	resetCmd.MarkFlagRequired("type")
 
-	resetCmd.Flags().BoolVarP(&Confirm, "confirm", "c", false, "Used to confirm the database delition. Type true after the flag (required)")
+	resetCmd.Flags().BoolVarP(&ResetConfirm, "confirm", "c", false, "Used to confirm the database delition. Type true after the flag (required)")
 	resetCmd.MarkFlagRequired("confirm")
 
-	resetCmd.Flags().StringVarP(&Password, "password", "p", "", "Additional password required for delition. (required)")
+	resetCmd.Flags().StringVarP(&ResetPassword, "password", "p", "", "Additional password required for delition. (required)")
 	resetCmd.MarkFlagRequired("password")
 	// Here you will define your flags and configuration settings.
 
