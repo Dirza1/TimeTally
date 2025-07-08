@@ -66,7 +66,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_activity AS "Date Activity",
-    CAST(length_minutes AS FLOAT8) / 60 AS time_hours,
+    length_minutes AS "Time minutes",
     description,
     catagory
 FROM timeregistration
@@ -76,7 +76,7 @@ type OverviewAllTimeRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateActivity     time.Time
-	TimeHours        int32
+	TimeMinutes      int32
 	Description      string
 	Catagory         string
 }
@@ -94,7 +94,7 @@ func (q *Queries) OverviewAllTime(ctx context.Context) ([]OverviewAllTimeRow, er
 			&i.ID,
 			&i.RegistrationTime,
 			&i.DateActivity,
-			&i.TimeHours,
+			&i.TimeMinutes,
 			&i.Description,
 			&i.Catagory,
 		); err != nil {
@@ -116,7 +116,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_activity AS "Date Activity",
-    length_minutes / 60.0 AS "Time(hours)",
+    length_minutes AS "Time minutes",
     description,
     catagory
 FROM timeregistration
@@ -132,7 +132,7 @@ type OverviewTimeDatesRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateActivity     time.Time
-	TimeHours        int32
+	TimeMinutes      int32
 	Description      string
 	Catagory         string
 }
@@ -150,7 +150,7 @@ func (q *Queries) OverviewTimeDates(ctx context.Context, arg OverviewTimeDatesPa
 			&i.ID,
 			&i.RegistrationTime,
 			&i.DateActivity,
-			&i.TimeHours,
+			&i.TimeMinutes,
 			&i.Description,
 			&i.Catagory,
 		); err != nil {

@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/spf13/cobra"
@@ -25,10 +26,24 @@ var overviewCmd = &cobra.Command{
 		switch OverviewType {
 		case "Finance":
 			fmt.Println("Overfiew of the Financial database:")
-			fmt.Println(queries.OverviewAllTransactions(context.Background()))
+			entries, err := queries.OverviewAllTransactions(context.Background())
+			if err != nil {
+				log.Fatal("error during fetching of data: ", err)
+			}
+			for _, entry := range entries {
+				fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, DDescription: %s \n", entry.ID, entry.DateTransaction, entry.Catagory, entry.Description)
+			}
+
 		case "Time":
 			fmt.Println("Overview of the Timeregistrations:")
-			fmt.Println(queries.OverviewAllTime(context.Background()))
+			entries, err := queries.OverviewAllTime(context.Background())
+			if err != nil {
+				log.Fatal("error during fetching of data: ", err)
+			}
+			for _, entry := range entries {
+				fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(minutes): %d \n", entry.ID, entry.DateActivity, entry.Catagory, entry.Description, entry.TimeMinutes)
+			}
+
 		default:
 			fmt.Println("Incorrect use of the -t/ --Time flag. Use Finance or Time after the flag. Be mindfull of capitalisation.")
 		}
