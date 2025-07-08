@@ -2,7 +2,7 @@
 INSERT INTO finances (id, timestamp,date_transaction, ammount_cent, type, description, catagory)
 VALUES(
     gen_random_UUID(),
-    NOW,
+    NOW(),
     $1,
     $2,
     $3,
