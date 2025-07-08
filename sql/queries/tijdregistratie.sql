@@ -18,7 +18,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_activity AS "Date Activity",
-    length_minutes AS "Time minutes",
+    (length_minutes/60.0)::FLOAT8 AS "Time Hours",
     description,
     catagory
 FROM timeregistration;
@@ -28,14 +28,14 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_activity AS "Date Activity",
-    length_minutes AS "Time minutes",
+    (length_minutes/60.0)::FLOAT8 AS "Time Hours",
     description,
     catagory
 FROM timeregistration
 WHERE date_activity >= $1 AND date_activity <= $2;
 
 -- name: TotalTimeDates :one
-SELECT sum(length_minutes/60.0)
+SELECT sum(length_minutes/60.0)::FLOAT8
 FROM timeregistration
 WHERE date_activity >= $1 AND date_activity <= $2;
 

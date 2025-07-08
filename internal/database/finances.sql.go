@@ -70,7 +70,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_transaction AS "Date Transaction",
-    ammount_cent / 100.0 AS "Amount",
+    (ammount_cent /100.0)::FLOAT8 AS "Amount",
     type,
     description,
     catagory
@@ -81,7 +81,7 @@ type OverviewAllTransactionsRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateTransaction  time.Time
-	Amount           int32
+	Amount           float64
 	Type             string
 	Description      string
 	Catagory         string
@@ -123,7 +123,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_transaction AS "Date Transaction",
-    ammount_cent / 100.0 AS "Amount",
+    (ammount_cent /100.0)::FLOAT8 AS "Amount",
     type,
     description,
     catagory
@@ -140,7 +140,7 @@ type OverviewTransactionsDateRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateTransaction  time.Time
-	Amount           int32
+	Amount           float64
 	Type             string
 	Description      string
 	Catagory         string
@@ -187,7 +187,7 @@ func (q *Queries) ResetTransaction(ctx context.Context) error {
 }
 
 const totalTransactionsDates = `-- name: TotalTransactionsDates :one
-SELECT sum(ammount_cent/100.0)
+SELECT sum(ammount_cent/100.0)::FLOAT8
 FROM finances
 WHERE date_transaction >= $1 AND date_transaction <= $2
 `
@@ -197,11 +197,11 @@ type TotalTransactionsDatesParams struct {
 	DateTransaction_2 time.Time
 }
 
-func (q *Queries) TotalTransactionsDates(ctx context.Context, arg TotalTransactionsDatesParams) (int64, error) {
+func (q *Queries) TotalTransactionsDates(ctx context.Context, arg TotalTransactionsDatesParams) (float64, error) {
 	row := q.db.QueryRowContext(ctx, totalTransactionsDates, arg.DateTransaction, arg.DateTransaction_2)
-	var sum int64
-	err := row.Scan(&sum)
-	return sum, err
+	var column_1 float64
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const updateTransaction = `-- name: UpdateTransaction :one

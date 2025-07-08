@@ -66,7 +66,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_activity AS "Date Activity",
-    length_minutes AS "Time minutes",
+    (length_minutes/60.0)::FLOAT8 AS "Time Hours",
     description,
     catagory
 FROM timeregistration
@@ -76,7 +76,7 @@ type OverviewAllTimeRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateActivity     time.Time
-	TimeMinutes      int32
+	TimeHours        float64
 	Description      string
 	Catagory         string
 }
@@ -94,7 +94,7 @@ func (q *Queries) OverviewAllTime(ctx context.Context) ([]OverviewAllTimeRow, er
 			&i.ID,
 			&i.RegistrationTime,
 			&i.DateActivity,
-			&i.TimeMinutes,
+			&i.TimeHours,
 			&i.Description,
 			&i.Catagory,
 		); err != nil {
@@ -116,7 +116,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_activity AS "Date Activity",
-    length_minutes AS "Time minutes",
+    (length_minutes/60.0)::FLOAT8 AS "Time Hours",
     description,
     catagory
 FROM timeregistration
@@ -132,7 +132,7 @@ type OverviewTimeDatesRow struct {
 	ID               uuid.UUID
 	RegistrationTime time.Time
 	DateActivity     time.Time
-	TimeMinutes      int32
+	TimeHours        float64
 	Description      string
 	Catagory         string
 }
@@ -150,7 +150,7 @@ func (q *Queries) OverviewTimeDates(ctx context.Context, arg OverviewTimeDatesPa
 			&i.ID,
 			&i.RegistrationTime,
 			&i.DateActivity,
-			&i.TimeMinutes,
+			&i.TimeHours,
 			&i.Description,
 			&i.Catagory,
 		); err != nil {
@@ -177,7 +177,7 @@ func (q *Queries) ResetTimeRegistration(ctx context.Context) error {
 }
 
 const totalTimeDates = `-- name: TotalTimeDates :one
-SELECT sum(length_minutes/60.0)
+SELECT sum(length_minutes/60.0)::FLOAT8
 FROM timeregistration
 WHERE date_activity >= $1 AND date_activity <= $2
 `
@@ -187,11 +187,11 @@ type TotalTimeDatesParams struct {
 	DateActivity_2 time.Time
 }
 
-func (q *Queries) TotalTimeDates(ctx context.Context, arg TotalTimeDatesParams) (int64, error) {
+func (q *Queries) TotalTimeDates(ctx context.Context, arg TotalTimeDatesParams) (float64, error) {
 	row := q.db.QueryRowContext(ctx, totalTimeDates, arg.DateActivity, arg.DateActivity_2)
-	var sum int64
-	err := row.Scan(&sum)
-	return sum, err
+	var column_1 float64
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const updateTime = `-- name: UpdateTime :one

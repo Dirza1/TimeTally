@@ -19,7 +19,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_transaction AS "Date Transaction",
-    ammount_cent / 100.0 AS "Amount",
+    (ammount_cent /100.0)::FLOAT8 AS "Amount",
     type,
     description,
     catagory
@@ -30,7 +30,7 @@ SELECT
     id,
     timestamp AS "Registration Time",
     date_transaction AS "Date Transaction",
-    ammount_cent / 100.0 AS "Amount",
+    (ammount_cent /100.0)::FLOAT8 AS "Amount",
     type,
     description,
     catagory
@@ -38,7 +38,7 @@ FROM finances
 WHERE date_transaction >= $1 AND date_transaction <= $2;
 
 -- name: TotalTransactionsDates :one
-SELECT sum(ammount_cent/100.0)
+SELECT sum(ammount_cent/100.0)::FLOAT8
 FROM finances
 WHERE date_transaction >= $1 AND date_transaction <= $2;
 

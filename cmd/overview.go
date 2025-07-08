@@ -31,7 +31,7 @@ var overviewCmd = &cobra.Command{
 				log.Fatal("error during fetching of data: ", err)
 			}
 			for _, entry := range entries {
-				fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, DDescription: %s, Total ammount: %d \n",
+				fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Euro): %.2f \n",
 					entry.ID, entry.DateTransaction, entry.Catagory, entry.Description, entry.Amount)
 			}
 
@@ -42,8 +42,8 @@ var overviewCmd = &cobra.Command{
 				log.Fatal("error during fetching of data: ", err)
 			}
 			for _, entry := range entries {
-				fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(minutes): %d \n",
-					entry.ID, entry.DateActivity, entry.Catagory, entry.Description, entry.TimeMinutes)
+				fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %.2f \n",
+					entry.ID, entry.DateActivity, entry.Catagory, entry.Description, entry.TimeHours)
 			}
 
 		default:
