@@ -30,6 +30,7 @@ var overviewByCategoryCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal("error during record retrieval: ", err)
 			}
+			fmt.Printf("Overview of the Financial database of the catagroy %s\n", overviewByCategoryCategory)
 			for _, entry := range entries {
 				fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Euro): %.2f \n",
 					entry.ID, entry.DateTransaction.Format(layout), entry.Catagory, entry.Description, entry.Amount)
@@ -39,6 +40,7 @@ var overviewByCategoryCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal("error during record retrieval: ", err)
 			}
+			fmt.Printf("Overview of the Time database of the catagroy %s\n", overviewByCategoryCategory)
 			for _, entry := range entries {
 				fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %.2f \n",
 					entry.ID, entry.DateActivity.Format(layout), entry.Catagory, entry.Description, entry.TimeHours)
@@ -47,7 +49,6 @@ var overviewByCategoryCmd = &cobra.Command{
 			fmt.Println("Incorrect use of the -t/ --Time flag. Use Finance or Time after the flag. Be mindfull of capitalisation.")
 		}
 
-		fmt.Println("overviewByCategory called")
 	},
 }
 
