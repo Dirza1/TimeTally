@@ -12,10 +12,7 @@ import (
 )
 
 func DatabaseConnection() database.Queries {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("error loading .env:", err)
-	}
+	godotenv.Load("/home/jasperolthof/workspace/github.com/Dirza1/Time-and-expence-registration/.env")
 	dbURL := os.Getenv("DB_URL")
 	dbConn, err := sql.Open("postgres", dbURL)
 	if err != nil {

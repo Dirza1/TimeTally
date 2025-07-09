@@ -30,7 +30,8 @@ var resetCmd = &cobra.Command{
 		if ResetConfirm != true {
 			log.Fatal("Confirm flag not set correctly.")
 		}
-		godotenv.Load(".env")
+		godotenv.Load("/home/jasperolthof/workspace/github.com/Dirza1/Time-and-expence-registration/.env")
+
 		setPasword := os.Getenv("reset_password")
 		if setPasword != ResetPassword {
 			log.Fatal("Incorrect password supplied")
