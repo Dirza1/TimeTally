@@ -51,3 +51,15 @@ UPDATE finances
 SET date_transaction = $1, ammount_cent = $2, type = $3, description = $4, catagory = $5
 WHERE id = $6
 RETURNING *;
+
+-- name: OverviewTransactionByCatagory :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    (ammount_cent /100.0)::FLOAT8 AS "Amount",
+    type,
+    description,
+    catagory
+FROM finances
+WHERE catagory LIKE $1;

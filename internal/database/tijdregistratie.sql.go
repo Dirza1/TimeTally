@@ -111,6 +111,57 @@ func (q *Queries) OverviewAllTime(ctx context.Context) ([]OverviewAllTimeRow, er
 	return items, nil
 }
 
+const overviewTimeByCatagory = `-- name: OverviewTimeByCatagory :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    (length_minutes/60.0)::FLOAT8 AS "Time Hours",
+    description,
+    catagory
+FROM timeregistration
+WHERE catagory LIKE $1
+`
+
+type OverviewTimeByCatagoryRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateActivity     time.Time
+	TimeHours        float64
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewTimeByCatagory(ctx context.Context, catagory string) ([]OverviewTimeByCatagoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTimeByCatagory, catagory)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OverviewTimeByCatagoryRow
+	for rows.Next() {
+		var i OverviewTimeByCatagoryRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RegistrationTime,
+			&i.DateActivity,
+			&i.TimeHours,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const overviewTimeDates = `-- name: OverviewTimeDates :many
 SELECT 
     id,

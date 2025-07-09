@@ -22,6 +22,7 @@ var overviewCmd = &cobra.Command{
 	It returns the full database from the start of recording till the end. There are other commands avalible to narrow down the search for particular years or months.
 	This command requires one flag to diferantiate between the diferent databases that can be querried.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		layout := "02-01-2006"
 		queries := utils.DatabaseConnection()
 		switch OverviewType {
 		case "Finance":
@@ -32,7 +33,7 @@ var overviewCmd = &cobra.Command{
 			}
 			for _, entry := range entries {
 				fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Euro): %.2f \n",
-					entry.ID, entry.DateTransaction, entry.Catagory, entry.Description, entry.Amount)
+					entry.ID, entry.DateTransaction.Format(layout), entry.Catagory, entry.Description, entry.Amount)
 			}
 
 		case "Time":
@@ -43,7 +44,7 @@ var overviewCmd = &cobra.Command{
 			}
 			for _, entry := range entries {
 				fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %.2f \n",
-					entry.ID, entry.DateActivity, entry.Catagory, entry.Description, entry.TimeHours)
+					entry.ID, entry.DateActivity.Format(layout), entry.Catagory, entry.Description, entry.TimeHours)
 			}
 
 		default:

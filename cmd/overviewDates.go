@@ -20,13 +20,9 @@ var OverviewDatesSecondDate string
 
 var overviewDatesCmd = &cobra.Command{
 	Use:   "overviewDates",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Gives an overview of either or both of the databases between two specified dates.",
+	Long: `This command returns an overview of one or both of the databaases entries between the two specified dates.
+	One flag sets the datase to be querries and the other two flags specify the dates to querry.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		firstDate := utils.TimeParse(OverviewDatesFirstDate)
 		querry := utils.DatabaseConnection()

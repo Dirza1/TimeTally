@@ -118,6 +118,60 @@ func (q *Queries) OverviewAllTransactions(ctx context.Context) ([]OverviewAllTra
 	return items, nil
 }
 
+const overviewTransactionByCatagory = `-- name: OverviewTransactionByCatagory :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_transaction AS "Date Transaction",
+    (ammount_cent /100.0)::FLOAT8 AS "Amount",
+    type,
+    description,
+    catagory
+FROM finances
+WHERE catagory LIKE $1
+`
+
+type OverviewTransactionByCatagoryRow struct {
+	ID               uuid.UUID
+	RegistrationTime time.Time
+	DateTransaction  time.Time
+	Amount           float64
+	Type             string
+	Description      string
+	Catagory         string
+}
+
+func (q *Queries) OverviewTransactionByCatagory(ctx context.Context, catagory string) ([]OverviewTransactionByCatagoryRow, error) {
+	rows, err := q.db.QueryContext(ctx, overviewTransactionByCatagory, catagory)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OverviewTransactionByCatagoryRow
+	for rows.Next() {
+		var i OverviewTransactionByCatagoryRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RegistrationTime,
+			&i.DateTransaction,
+			&i.Amount,
+			&i.Type,
+			&i.Description,
+			&i.Catagory,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const overviewTransactionsDate = `-- name: OverviewTransactionsDate :many
 SELECT 
     id,

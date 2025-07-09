@@ -48,3 +48,14 @@ UPDATE timeregistration
 SET date_activity = $1, length_minutes = $2, description = $3, catagory = $4
 WHERE id = $5
 RETURNING *;
+
+-- name: OverviewTimeByCatagory :many
+SELECT 
+    id,
+    timestamp AS "Registration Time",
+    date_activity AS "Date Activity",
+    (length_minutes/60.0)::FLOAT8 AS "Time Hours",
+    description,
+    catagory
+FROM timeregistration
+WHERE catagory LIKE $1;
