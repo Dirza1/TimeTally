@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"testing"
 
@@ -17,7 +19,7 @@ type CLITest struct {
 	Command    string
 	Args       []string
 	WantOutput string
-	WantErr    bool
+	WantErr    error
 }
 
 func TestMain(m *testing.M) {
@@ -38,45 +40,64 @@ func TestReset(t *testing.T) {
 	tests := []CLITest{
 		{
 			Name:       "Test reset of both databases",
-			Command:    "Time-and-expence-registration",
-			Args:       []string{"reset", "-c", "true", "-t", "All", "-p", "Odin2203!"},
-			WantOutput: "reset called on all",
-			WantErr:    false,
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All", "-p", "Odin2203!"},
+			WantOutput: "reset called on all\n",
+			WantErr:    nil,
 		},
 		{
 			Name:       "Test reset of Finance database",
-			Command:    "Time-and-expence-registration",
-			Args:       []string{"reset", "-c", "true", "-t", "Finance", "-p", "Odin2203!"},
-			WantOutput: "reset called on all",
-			WantErr:    false,
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "Finance", "-p", "Odin2203!"},
+			WantOutput: "reset called on finance\n",
+			WantErr:    nil,
 		},
 		{
 			Name:       "Test reset of Time database",
-			Command:    "Time-and-expence-registration",
-			Args:       []string{"reset", "-c", "true", "-t", "Time", "-p", "Odin2203!"},
-			WantOutput: "reset called on all",
-			WantErr:    false,
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "Time", "-p", "Odin2203!"},
+			WantOutput: "reset called on time\n",
+			WantErr:    nil,
 		},
 	}
-	os.Args = []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All", "-p", "Odin2203!"}
-	err := rootCmd.Execute()
-	if err != nil {
-		t.Fatal(err)
-	}
-	timeList, err := querry.OverviewAllTime(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(timeList) != 0 {
-		fmt.Println("Test failed, time database not empty")
-		t.Fail()
-	}
-	financeList, err := querry.OverviewAllTransactions(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(financeList) != 0 {
-		fmt.Println("Test failed, finance database not empty")
-		t.Fail()
+
+	for _, test := range tests {
+
+		r, w, _ := os.Pipe()
+		originalStdout := os.Stdout
+
+		os.Stdout = w
+		os.Args = test.Args
+		err := rootCmd.Execute()
+
+		w.Close()
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		os.Stdout = originalStdout
+		output := buf.String()
+
+		if output != test.WantOutput {
+			fmt.Printf("%s failed:", test.Name)
+			fmt.Printf("output: %s, expected output: %s\n", output, test.WantOutput)
+			t.Fail()
+		}
+		if err != test.WantErr {
+			t.Fail()
+		}
+		timeList, err := querry.OverviewAllTime(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(timeList) != 0 {
+			fmt.Println("Test failed, time database not empty")
+			t.Fail()
+
+		}
+		financeList, err := querry.OverviewAllTransactions(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(financeList) != 0 {
+			fmt.Println("Test failed, finance database not empty")
+			t.Fail()
+		}
+
 	}
 }
