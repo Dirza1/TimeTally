@@ -44,7 +44,7 @@ var resetCmd = &cobra.Command{
 				fmt.Printf("error during reset: %s \n", err)
 				return
 			}
-			fmt.Println("reset called on financee")
+			fmt.Println("reset called on finance")
 		case "Time":
 			err := queries.ResetTimeRegistration(context.Background())
 			if err != nil {
