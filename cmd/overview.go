@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/spf13/cobra"
@@ -29,7 +28,8 @@ var overviewCmd = &cobra.Command{
 			fmt.Println("Overfiew of the Financial database:")
 			entries, err := queries.OverviewAllTransactions(context.Background())
 			if err != nil {
-				log.Fatal("error during fetching of data: ", err)
+				fmt.Printf("error during fetching of data: %s \n", err)
+				return
 			}
 			for _, entry := range entries {
 				fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Euro): %.2f \n",
@@ -40,7 +40,8 @@ var overviewCmd = &cobra.Command{
 			fmt.Println("Overview of the Timeregistrations:")
 			entries, err := queries.OverviewAllTime(context.Background())
 			if err != nil {
-				log.Fatal("error during fetching of data: ", err)
+				fmt.Printf("error during fetching of data: %s \n", err)
+				return
 			}
 			for _, entry := range entries {
 				fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %.2f \n",

@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/google/uuid"
@@ -25,20 +24,23 @@ var deleteEntryCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ID, err := uuid.Parse(deleteEntryId)
 		if err != nil {
-			log.Fatal("error during parsing of ID: ", err)
+			fmt.Printf("error during parsing of ID: %s \n", err)
+			return
 		}
 		queries := utils.DatabaseConnection()
 		switch deleteEntryType {
 		case "Financial":
 			err := queries.DeleteTransaction(context.Background(), ID)
 			if err != nil {
-				log.Fatal("Error during deletion: ", err)
+				fmt.Printf("error during deletion: %s \n", err)
+				return
 			}
 			fmt.Println("Entry deleted")
 		case "Time":
 			err := queries.DeleteTime(context.Background(), ID)
 			if err != nil {
-				log.Fatal("Error during deletion: ", err)
+				fmt.Printf("error during deletion: %s \n", err)
+				return
 			}
 			fmt.Println("Entry deleted")
 		default:

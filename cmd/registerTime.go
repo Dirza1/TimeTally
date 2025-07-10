@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -36,7 +35,8 @@ var registerTimeCmd = &cobra.Command{
 		query := utils.DatabaseConnection()
 		entry, err := query.AddTimeRegistration(context.Background(), time)
 		if err != nil {
-			log.Fatal("error during inserting into the database: ", err)
+			fmt.Printf("error during inserting data into the database: %s \n", err)
+			return
 		}
 		fmt.Printf("Databse entry created!")
 		fmt.Println(entry)

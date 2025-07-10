@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -40,7 +39,8 @@ var registerTransactionCmd = &cobra.Command{
 
 		transactions, err := query.AddTransaction(context.Background(), transaction)
 		if err != nil {
-			log.Fatal("error during registering of transaction: ", err)
+			fmt.Printf("error during inserting data into the database: %s \n", err)
+			return
 		}
 
 		fmt.Println("Transaction added!")

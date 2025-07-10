@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -34,7 +33,8 @@ var updateTransactionCmd = &cobra.Command{
 
 		ID, err := uuid.Parse(updateTransactionID)
 		if err != nil {
-			log.Fatal("error during parsing of ID: ", err)
+			fmt.Printf("error during parsing of the ID: %s \n", err)
+			return
 		}
 		transaction := database.UpdateTransactionParams{
 			DateTransaction: utils.TimeParse(updateTransactionDate),
@@ -47,7 +47,8 @@ var updateTransactionCmd = &cobra.Command{
 
 		transactions, err := query.UpdateTransaction(context.Background(), transaction)
 		if err != nil {
-			log.Fatal("error during updating of the time entry: ", err)
+			fmt.Printf("error during updating of the entry: %s \n", err)
+			return
 		}
 		fmt.Println("Transaction updated to: ")
 		fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Cent): %d \n",

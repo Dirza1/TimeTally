@@ -30,34 +30,38 @@ var resetCmd = &cobra.Command{
 		if ResetConfirm != true {
 			log.Fatal("Confirm flag not set correctly.")
 		}
-		godotenv.Load("/home/jasperolthof/workspace/github.com/Dirza1/Time-and-expence-registration/.env")
+		godotenv.Load("/home/jasperolthof/workspace/projects/Time-and-expence-registration/.env")
 
 		setPasword := os.Getenv("reset_password")
 		if setPasword != ResetPassword {
-			log.Fatal("Incorrect password supplied")
+			fmt.Println("Incorrect password supplied")
 		}
 		queries := utils.DatabaseConnection()
 		switch ResetType {
 		case "Finance":
 			err := queries.ResetTransaction(context.Background())
 			if err != nil {
-				log.Fatal("error during reset: ", err)
+				fmt.Printf("error during reset: %s \n", err)
+				return
 			}
 			fmt.Println("reset called on financee")
 		case "Time":
 			err := queries.ResetTimeRegistration(context.Background())
 			if err != nil {
-				log.Fatal("error during reset: ", err)
+				fmt.Printf("error during reset: %s \n", err)
+				return
 			}
 			fmt.Println("reset called on time")
 		case "All":
 			err := queries.ResetTimeRegistration(context.Background())
 			if err != nil {
-				log.Fatal("error during reset: ", err)
+				fmt.Printf("error during reset: %s \n", err)
+				return
 			}
 			err = queries.ResetTransaction(context.Background())
 			if err != nil {
-				log.Fatal("error during reset: ", err)
+				fmt.Printf("error during reset: %s \n", err)
+				return
 			}
 			fmt.Println("reset called on all")
 		default:

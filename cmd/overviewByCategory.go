@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/spf13/cobra"
@@ -28,7 +27,8 @@ var overviewByCategoryCmd = &cobra.Command{
 		case "Financial":
 			entries, err := query.OverviewTransactionByCatagory(context.Background(), overviewByCategoryCategory)
 			if err != nil {
-				log.Fatal("error during record retrieval: ", err)
+				fmt.Printf("error during fetching of data: %s \n", err)
+				return
 			}
 			fmt.Printf("Overview of the Financial database of the catagroy %s\n", overviewByCategoryCategory)
 			for _, entry := range entries {
@@ -38,7 +38,8 @@ var overviewByCategoryCmd = &cobra.Command{
 		case "Time":
 			entries, err := query.OverviewTimeByCatagory(context.Background(), overviewByCategoryCategory)
 			if err != nil {
-				log.Fatal("error during record retrieval: ", err)
+				fmt.Printf("error during fetching of data: %s \n", err)
+				return
 			}
 			fmt.Printf("Overview of the Time database of the catagroy %s\n", overviewByCategoryCategory)
 			for _, entry := range entries {

@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -60,7 +59,7 @@ var overviewDatesCmd = &cobra.Command{
 			fmt.Println("Overview op timeregistration databse:")
 			fmt.Println(querry.OverviewTimeDates(context.Background(), time))
 		default:
-			log.Fatal("Incorrect use of the type flag. Use Finance, Time or All. Pay mind to the capitalation.")
+			fmt.Println("Incorrect use of the type flag. Use Finance, Time or All. Pay mind to the capitalation.")
 		}
 	},
 }
