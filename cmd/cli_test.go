@@ -19,7 +19,6 @@ type CLITest struct {
 	Command    string
 	Args       []string
 	WantOutput string
-	WantErr    error
 }
 
 func TestMain(m *testing.M) {
@@ -42,19 +41,46 @@ func TestReset(t *testing.T) {
 			Name:       "Test reset of both databases",
 			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All", "-p", "Odin2203!"},
 			WantOutput: "reset called on all\n",
-			WantErr:    nil,
 		},
 		{
 			Name:       "Test reset of Finance database",
 			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "Finance", "-p", "Odin2203!"},
 			WantOutput: "reset called on finance\n",
-			WantErr:    nil,
 		},
 		{
 			Name:       "Test reset of Time database",
 			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "Time", "-p", "Odin2203!"},
 			WantOutput: "reset called on time\n",
-			WantErr:    nil,
+		},
+		{
+			Name:       "Wrong password supplied",
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All", "-p", "lol"},
+			WantOutput: "Incorrect password supplied\n",
+		},
+		{
+			Name:       "Confirm flag not set correctly",
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "false", "-t", "All", "-p", "Odin2203!"},
+			WantOutput: "Confirm flag not set correctly\n",
+		},
+		{
+			Name:       "Incorrect type flag",
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "all", "-p", "Odin2203!"},
+			WantOutput: "Incorrect use of Type flag. Use either Finance, Time or All. Ensure correct capitalisation\n",
+		},
+		{
+			Name:       "Pasword flag not set",
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All"},
+			WantOutput: `required flag(s) "password" not set\n`,
+		},
+		{
+			Name:       "type flag not set",
+			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-p", "Odin2203!"},
+			WantOutput: `required flag(s) "type" not set\n`,
+		},
+		{
+			Name:       "confirm flag not set",
+			Args:       []string{"Time-and-expence-registration", "reset", "-t", "All", "-p", "Odin2203!"},
+			WantOutput: `required flag(s) "confirm" not set\n`,
 		},
 	}
 
@@ -65,7 +91,7 @@ func TestReset(t *testing.T) {
 
 		os.Stdout = w
 		os.Args = test.Args
-		err := rootCmd.Execute()
+		rootCmd.Execute()
 
 		w.Close()
 		var buf bytes.Buffer
@@ -74,11 +100,8 @@ func TestReset(t *testing.T) {
 		output := buf.String()
 
 		if output != test.WantOutput {
-			fmt.Printf("%s failed:", test.Name)
-			fmt.Printf("output: %s, expected output: %s\n", output, test.WantOutput)
-			t.Fail()
-		}
-		if err != test.WantErr {
+			fmt.Printf("%s failed:\n", test.Name)
+			fmt.Printf("output: %s expected output: %s\n", output, test.WantOutput)
 			t.Fail()
 		}
 		timeList, err := querry.OverviewAllTime(context.Background())

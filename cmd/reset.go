@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -16,7 +15,7 @@ import (
 
 // resetCmd represents the reset command
 var ResetType string
-var ResetConfirm bool
+var ResetConfirm string
 var ResetPassword string
 
 var resetCmd = &cobra.Command{
@@ -27,14 +26,16 @@ var resetCmd = &cobra.Command{
 	Execution of this command requires an additional password to protect against axidental use.
 	Additionaly this command uses 3 required flags for the database to be deleted, confirming to delete and the password.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if ResetConfirm != true {
-			log.Fatal("Confirm flag not set correctly.")
+		if ResetConfirm != "true" {
+			fmt.Println("Confirm flag not set correctly")
+			return
 		}
 		godotenv.Load("/home/jasperolthof/workspace/projects/Time-and-expence-registration/.env")
 
 		setPasword := os.Getenv("reset_password")
 		if setPasword != ResetPassword {
 			fmt.Println("Incorrect password supplied")
+			return
 		}
 		queries := utils.DatabaseConnection()
 		switch ResetType {
@@ -76,7 +77,7 @@ func init() {
 	resetCmd.Flags().StringVarP(&ResetType, "type", "t", "all", "Used to diferenciate which database needs to be deleted. Use Finance, Time or all as input. (required)")
 	resetCmd.MarkFlagRequired("type")
 
-	resetCmd.Flags().BoolVarP(&ResetConfirm, "confirm", "c", false, "Used to confirm the database delition. Type true after the flag (required)")
+	resetCmd.Flags().StringVarP(&ResetConfirm, "confirm", "c", "false", "Used to confirm the database delition. Type true after the flag (required)")
 	resetCmd.MarkFlagRequired("confirm")
 
 	resetCmd.Flags().StringVarP(&ResetPassword, "password", "p", "", "Additional password required for delition. (required)")
