@@ -56,19 +56,40 @@ func init() {
 	rootCmd.AddCommand(updateTimeCmd)
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeCmdDate, "date", "d", "", "Flag to specify the date worked on a project. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	updateTimeCmd.MarkFlagRequired("date")
+	err := updateTimeCmd.MarkFlagRequired("date")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTimeCmd.Flags().Int32VarP(&updateTimeCmdMinutes, "time", "t", 0, "Flag to specify the amount of time worked on a project in minutes.")
-	updateTimeCmd.MarkFlagRequired("time")
+	err = updateTimeCmd.MarkFlagRequired("time")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeCmdCategory, "category", "c", "", "Flag to specify the category/project name of the project.")
-	updateTimeCmd.MarkFlagRequired("category")
+	err = updateTimeCmd.MarkFlagRequired("category")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeCmdDescription, "description", "e", "", "Flag to specify the description of the work performed.")
-	updateTimeCmd.MarkFlagRequired("description")
+	err = updateTimeCmd.MarkFlagRequired("description")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeID, "id", "i", "", "Flag to specify the ID of the work performed.")
-	updateTimeCmd.MarkFlagRequired("id")
+	err = updateTimeCmd.MarkFlagRequired("id")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

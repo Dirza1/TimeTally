@@ -58,7 +58,11 @@ func init() {
 	rootCmd.AddCommand(overviewCmd)
 
 	overviewCmd.Flags().StringVarP(&OverviewType, "type", "t", "Time", "A flag to diferatiate between the databases. Use either Financial or Time after the flag")
-	overviewCmd.MarkFlagRequired("type")
+	err := overviewCmd.MarkFlagRequired("type")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

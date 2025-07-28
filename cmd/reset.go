@@ -30,7 +30,11 @@ var resetCmd = &cobra.Command{
 			fmt.Println("Confirm flag not set correctly")
 			return
 		}
-		godotenv.Load("/home/jasperolthof/workspace/projects/Time-and-expence-registration/.env")
+		err := godotenv.Load("/home/jasperolthof/workspace/projects/Time-and-expence-registration/.env")
+		if err != nil {
+			fmt.Printf("Error loading enviromental variables")
+			return
+		}
 
 		setPasword := os.Getenv("reset_password")
 		if setPasword != ResetPassword {
@@ -75,13 +79,26 @@ func init() {
 	rootCmd.AddCommand(resetCmd)
 
 	resetCmd.Flags().StringVarP(&ResetType, "type", "t", "all", "Used to diferenciate which database needs to be deleted. Use Finance, Time or all as input. (required)")
-	resetCmd.MarkFlagRequired("type")
+	err := resetCmd.MarkFlagRequired("type")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	resetCmd.Flags().StringVarP(&ResetConfirm, "confirm", "c", "false", "Used to confirm the database delition. Type true after the flag (required)")
-	resetCmd.MarkFlagRequired("confirm")
+	err = resetCmd.MarkFlagRequired("confirm")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	resetCmd.Flags().StringVarP(&ResetPassword, "password", "p", "", "Additional password required for delition. (required)")
-	resetCmd.MarkFlagRequired("password")
+	err = resetCmd.MarkFlagRequired("password")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

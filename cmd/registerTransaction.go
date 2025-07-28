@@ -52,19 +52,40 @@ func init() {
 	rootCmd.AddCommand(registerTransactionCmd)
 
 	registerTransactionCmd.Flags().StringVarP(&registerTransactionDate, "date", "d", "", "Flag denote the date of the transaction. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	registerTransactionCmd.MarkFlagRequired("date")
+	err := registerTransactionCmd.MarkFlagRequired("date")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	registerTransactionCmd.Flags().Int32VarP(&registerTransactionAmmount, "amount", "a", 0, "Flag denote the amount spent or gaained in the transaction. Input the ammount in cents e.g. 1 euro is 100")
-	registerTransactionCmd.MarkFlagRequired("amount")
+	err = registerTransactionCmd.MarkFlagRequired("amount")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	registerTransactionCmd.Flags().StringVarP(&registerTransactionType, "type", "t", "", "Flag denote the type of the transaction. Use either spent or gained")
-	registerTransactionCmd.MarkFlagRequired("type")
+	err = registerTransactionCmd.MarkFlagRequired("type")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	registerTransactionCmd.Flags().StringVarP(&registerTransactionDescription, "description", "e", "", "Flag denote the description of the transaction.")
-	registerTransactionCmd.MarkFlagRequired("description")
+	err = registerTransactionCmd.MarkFlagRequired("description")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	registerTransactionCmd.Flags().StringVarP(&registerTransactionCatagory, "catagory", "c", "", "Flag denote the catagory of the transaction. Use a project for the name.")
-	registerTransactionCmd.MarkFlagRequired("catagory")
+	err = registerTransactionCmd.MarkFlagRequired("catagory")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

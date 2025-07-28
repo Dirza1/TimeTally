@@ -57,10 +57,18 @@ func init() {
 	rootCmd.AddCommand(overviewByCategoryCmd)
 
 	overviewByCategoryCmd.Flags().StringVarP(&overviewByCategoryCategory, "category", "c", "", "A flag to specify the category you aare looking for")
-	overviewByCategoryCmd.MarkFlagRequired("category")
+	err := overviewByCategoryCmd.MarkFlagRequired("category")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	overviewByCategoryCmd.Flags().StringVarP(&overviewByCategoryType, "type", "t", "", "A flag to specify the database you want to querry. Use Financial, Time or all after the flag")
-	overviewByCategoryCmd.MarkFlagRequired("type")
+	err = overviewByCategoryCmd.MarkFlagRequired("type")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

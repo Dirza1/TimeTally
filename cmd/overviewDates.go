@@ -68,13 +68,25 @@ func init() {
 	rootCmd.AddCommand(overviewDatesCmd)
 
 	overviewDatesCmd.Flags().StringVarP(&OverviewDatesType, "type", "t", "all", "Flag to specify the database to querry. Use Finance, Time or All after the flag")
-	overviewDatesCmd.MarkFlagRequired("type")
+	err := overviewDatesCmd.MarkFlagRequired("type")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	overviewDatesCmd.Flags().StringVarP(&OverviewDatesFirstDate, "First-Date", "f", "", "Flag to specify the first date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	overviewDatesCmd.MarkFlagRequired("month")
+	err = overviewDatesCmd.MarkFlagRequired("month")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	overviewDatesCmd.Flags().StringVarP(&OverviewDatesSecondDate, "Second-Date", "s", "", "Flag to specify the second date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	overviewDatesCmd.MarkFlagRequired("year")
+	err = overviewDatesCmd.MarkFlagRequired("year")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	// Here you will define your flags and configuration settings.
 

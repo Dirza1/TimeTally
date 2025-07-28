@@ -48,16 +48,33 @@ func init() {
 	rootCmd.AddCommand(registerTimeCmd)
 
 	registerTimeCmd.Flags().StringVarP(&registerTimeDate, "date", "d", "", "Flag to specify the date worked on a project. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	registerTimeCmd.MarkFlagRequired("date")
+	err := registerTimeCmd.MarkFlagRequired("date")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	registerTimeCmd.Flags().Int32VarP(&registerTimeMinutes, "time", "t", 0, "Flag to specify the amount of time worked on a project in minutes.")
-	registerTimeCmd.MarkFlagRequired("time")
+	err = registerTimeCmd.MarkFlagRequired("time")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	registerTimeCmd.Flags().StringVarP(&registerTimeCategory, "category", "c", "", "Flag to specify the category/project name of the project.")
-	registerTimeCmd.MarkFlagRequired("category")
+	err = registerTimeCmd.MarkFlagRequired("category")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	registerTimeCmd.Flags().StringVarP(&registerTimeDescription, "description", "e", "", "Flag to specify the description of the work performed.")
-	registerTimeCmd.MarkFlagRequired("description")
+	err = registerTimeCmd.MarkFlagRequired("description")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

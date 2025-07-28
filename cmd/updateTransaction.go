@@ -60,22 +60,46 @@ func init() {
 	rootCmd.AddCommand(updateTransactionCmd)
 
 	updateTransactionCmd.Flags().StringVarP(&updateTransactionDate, "date", "d", "", "Flag denote the date of the transaction. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	updateTransactionCmd.MarkFlagRequired("date")
+	err := updateTransactionCmd.MarkFlagRequired("date")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTransactionCmd.Flags().Int32VarP(&updateTransactionAmmount, "amount", "a", 0, "Flag denote the amount spent or gaained in the transaction. Input the ammount in cents e.g. 1 euro is 100")
-	updateTransactionCmd.MarkFlagRequired("amount")
+	err = updateTransactionCmd.MarkFlagRequired("amount")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTransactionCmd.Flags().StringVarP(&updateTransactionType, "type", "t", "", "Flag denote the type of the transaction. Use either spent or gained")
-	updateTransactionCmd.MarkFlagRequired("type")
+	err = updateTransactionCmd.MarkFlagRequired("type")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTransactionCmd.Flags().StringVarP(&updateTransactionDescription, "description", "e", "", "Flag denote the description of the transaction.")
-	updateTransactionCmd.MarkFlagRequired("description")
+	err = updateTransactionCmd.MarkFlagRequired("description")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	updateTransactionCmd.Flags().StringVarP(&updateTransactionCatagory, "catagory", "c", "", "Flag denote the catagory of the transaction. Use a project for the name.")
-	updateTransactionCmd.MarkFlagRequired("catagory")
-
+	err = updateTransactionCmd.MarkFlagRequired("catagory")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 	updateTransactionCmd.Flags().StringVarP(&updateTransactionID, "id", "i", "", "Flag denote the ID of the transaction.")
-	updateTransactionCmd.MarkFlagRequired("id")
+	err = updateTransactionCmd.MarkFlagRequired("id")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

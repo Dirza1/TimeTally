@@ -54,10 +54,18 @@ func init() {
 	rootCmd.AddCommand(deleteEntryCmd)
 
 	deleteEntryCmd.Flags().StringVarP(&deleteEntryType, "type", "t", "", "A flag to diferatiate between the databases. Use either Financial or Time after the flag")
-	deleteEntryCmd.MarkFlagRequired("type")
+	err := deleteEntryCmd.MarkFlagRequired("type")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 
 	deleteEntryCmd.Flags().StringVarP(&deleteEntryId, "id", "i", "", "A flag to set the ID of the registrations that needs to be deleted")
-	deleteEntryCmd.MarkFlagRequired("id")
+	err = deleteEntryCmd.MarkFlagRequired("id")
+	if err != nil {
+		fmt.Printf("required flag not set")
+		return
+	}
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
