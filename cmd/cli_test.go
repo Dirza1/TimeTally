@@ -112,5 +112,9 @@ func TestReset(t *testing.T) {
 }
 
 func TestRegisterTime(t *testing.T) {
+	err := querry.ResetTimeRegistration(context.Background())
+	if err != nil {
+		fmt.Printf("Error during time database reset prior to test start: %s", err)
+	}
 
 }
