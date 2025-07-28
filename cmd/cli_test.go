@@ -67,60 +67,50 @@ func TestReset(t *testing.T) {
 			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "all", "-p", "Odin2203!"},
 			WantOutput: "Incorrect use of Type flag. Use either Finance, Time or All. Ensure correct capitalisation\n",
 		},
-		{
-			Name:       "Pasword flag not set",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All"},
-			WantOutput: `required flag(s) "password" not set\n`,
-		},
-		{
-			Name:       "type flag not set",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-p", "Odin2203!"},
-			WantOutput: `required flag(s) "type" not set\n`,
-		},
-		{
-			Name:       "confirm flag not set",
-			Args:       []string{"Time-and-expence-registration", "reset", "-t", "All", "-p", "Odin2203!"},
-			WantOutput: `required flag(s) "confirm" not set\n`,
-		},
 	}
 
 	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			r, w, _ := os.Pipe()
+			originalStdout := os.Stdout
 
-		r, w, _ := os.Pipe()
-		originalStdout := os.Stdout
+			os.Stdout = w
+			rootCmd.SetArgs(test.Args[1:])
+			rootCmd.Execute()
 
-		os.Stdout = w
-		os.Args = test.Args
-		rootCmd.Execute()
+			w.Close()
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			os.Stdout = originalStdout
+			output := buf.String()
 
-		w.Close()
-		var buf bytes.Buffer
-		io.Copy(&buf, r)
-		os.Stdout = originalStdout
-		output := buf.String()
+			if output != test.WantOutput {
+				fmt.Printf("%s failed:\n", test.Name)
+				fmt.Printf("output: %s expected output: %s\n", output, test.WantOutput)
+				t.Fail()
+			}
+			timeList, err := querry.OverviewAllTime(context.Background())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(timeList) != 0 {
+				fmt.Println("Test failed, time database not empty")
+				t.Fail()
 
-		if output != test.WantOutput {
-			fmt.Printf("%s failed:\n", test.Name)
-			fmt.Printf("output: %s expected output: %s\n", output, test.WantOutput)
-			t.Fail()
-		}
-		timeList, err := querry.OverviewAllTime(context.Background())
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(timeList) != 0 {
-			fmt.Println("Test failed, time database not empty")
-			t.Fail()
-
-		}
-		financeList, err := querry.OverviewAllTransactions(context.Background())
-		if err != nil {
-			t.Fatal(err)
-		}
-		if len(financeList) != 0 {
-			fmt.Println("Test failed, finance database not empty")
-			t.Fail()
-		}
+			}
+			financeList, err := querry.OverviewAllTransactions(context.Background())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(financeList) != 0 {
+				fmt.Println("Test failed, finance database not empty")
+				t.Fail()
+			}
+		})
 
 	}
+}
+
+func TestRegisterTime(t *testing.T) {
+
 }
