@@ -38,8 +38,10 @@ var registerTimeCmd = &cobra.Command{
 			fmt.Printf("error during inserting data into the database: %s \n", err)
 			return
 		}
-		fmt.Printf("Databse entry created!")
-		fmt.Println(entry)
+		layout := "02-01-2006"
+		fmt.Printf("Databse entry created!\n")
+		fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %d \n",
+			entry.ID, entry.DateActivity.Format(layout), entry.Catagory, entry.Description, entry.LengthMinutes)
 
 	},
 }

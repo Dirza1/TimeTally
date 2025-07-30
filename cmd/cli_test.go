@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
@@ -16,7 +17,6 @@ var querry database.Queries
 
 type CLITest struct {
 	Name       string
-	Command    string
 	Args       []string
 	WantOutput string
 }
@@ -112,9 +112,53 @@ func TestReset(t *testing.T) {
 }
 
 func TestRegisterTime(t *testing.T) {
+	tests := []CLITest{
+		{
+			Name: "First time registration",
+			Args: []string{"Time-and-expence-registration", "registerTime",
+				"-d", "15-01-2025",
+				"-t", "30",
+				"-c", "honney harvest",
+				"-e", "Harvest 4,5 kg of honney from hive#1"},
+			WantOutput: "15-01-2025 honney harvest 4,5 hive#1",
+		},
+		{
+			Name: "Second time registration",
+			Args: []string{"Time-and-expence-registration", "registerTime",
+				"-d", "31-05-2024",
+				"-t", "30",
+				"-c", "maintenance",
+				"-e", "weekly check on hive#2"},
+			WantOutput: "31-05-2024 maintenance  hive#2",
+		},
+	}
+
 	err := querry.ResetTimeRegistration(context.Background())
 	if err != nil {
 		fmt.Printf("Error during time database reset prior to test start: %s", err)
 	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			r, w, _ := os.Pipe()
+			originalStdout := os.Stdout
 
+			os.Stdout = w
+			rootCmd.SetArgs(test.Args[1:])
+			rootCmd.Execute()
+
+			w.Close()
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			os.Stdout = originalStdout
+			output := buf.String()
+			fmt.Printf("\n Output: %s", output)
+			for _, word := range strings.Split(test.WantOutput, " ") {
+				if !strings.Contains(output, word) {
+					fmt.Printf("\nTest failed: %s is not in %s", word, output)
+					t.Fail()
+				}
+
+			}
+		})
+	}
 }

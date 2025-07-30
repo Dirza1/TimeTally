@@ -42,9 +42,10 @@ var registerTransactionCmd = &cobra.Command{
 			fmt.Printf("error during inserting data into the database: %s \n", err)
 			return
 		}
-
+		layout := "02-01-2006"
 		fmt.Println("Transaction added!")
-		fmt.Println(transactions)
+		fmt.Printf("\nEntry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Cent): %d \n",
+			transactions.ID, transactions.DateTransaction.Format(layout), transactions.Catagory, transactions.Description, transactions.AmmountCent)
 	},
 }
 
