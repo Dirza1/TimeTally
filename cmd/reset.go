@@ -28,7 +28,7 @@ var resetCmd = &cobra.Command{
 			fmt.Println("Confirm flag not set correctly")
 			return
 		}
-		err = godotenv.Load("/home/jasperolthof/workspace/projects/Time-and-expence-registration/.env")
+		err = godotenv.Load("../.env")
 		if err != nil {
 			fmt.Printf("Error loading enviromental variables")
 			return
