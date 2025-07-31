@@ -144,7 +144,7 @@ func TestRegisterTime(t *testing.T) {
 
 			os.Stdout = w
 			rootCmd.SetArgs(test.Args[1:])
-			rootCmd.Execute()
+			err = rootCmd.Execute()
 
 			w.Close()
 			var buf bytes.Buffer
