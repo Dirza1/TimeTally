@@ -131,6 +131,16 @@ func TestRegisterTime(t *testing.T) {
 				"-e", "weekly check on hive#2"},
 			WantOutput: "31-05-2024 maintenance  hive#2",
 		},
+
+		{
+			Name: "Time is not an int",
+			Args: []string{"Time-and-expence-registration", "registerTime",
+				"-d", "31-05-2024",
+				"-t", "a",
+				"-c", "maintenance",
+				"-e", "weekly check on hive#2"},
+			WantOutput: "invalid argument a for -t, --time flag",
+		},
 	}
 
 	err := querry.ResetTimeRegistration(context.Background())
@@ -154,11 +164,73 @@ func TestRegisterTime(t *testing.T) {
 			fmt.Printf("\n Output: %s", output)
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) {
+					if err != nil && !strings.Contains(err.Error(), word) {
+						fmt.Printf("\nTest failed: %s is not in %s", word, output)
+						t.Fail()
+					}
+				}
+
+			}
+		})
+	}
+}
+
+func TestRegisterTransaction(t *testing.T) {
+	tests := []CLITest{
+		{
+			Name: "First transaction registration",
+			Args: []string{"Time-and-expence-registration", "registerTransaction",
+				"-d", "15-01-2025",
+				"-a", "300",
+				"-t", "spent",
+				"-c", "glass bottles",
+				"-e", "bought glass bottles for honney"},
+			WantOutput: "15-01-2025 300 spent glass bottles bought glass bottles for honney",
+		},
+		{
+			Name: "Second transaction registration",
+			Args: []string{"Time-and-expence-registration", "registerTransaction",
+				"-d", "16-02-2026",
+				"-a", "310",
+				"-t", "gained",
+				"-c", "bees",
+				"-e", "stuff to capture a swarm"},
+			WantOutput: "16-02-2026 310 gained bees stuff to capture a swarm",
+		},
+	}
+
+	err := querry.ResetTransaction(context.Background())
+	if err != nil {
+		fmt.Printf("Error during time database reset prior to test start: %s", err)
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			r, w, _ := os.Pipe()
+			originalStdout := os.Stdout
+
+			os.Stdout = w
+			rootCmd.SetArgs(test.Args[1:])
+			err = rootCmd.Execute()
+
+			w.Close()
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			os.Stdout = originalStdout
+			output := buf.String()
+			fmt.Printf("\n Output: %s", output)
+			for _, word := range strings.Split(test.WantOutput, " ") {
+				if !strings.Contains(output, word) && err == nil {
+					fmt.Printf("\nTest failed: %s is not in %s", word, output)
+					t.Fail()
+
+				} else if err != nil && !strings.Contains(err.Error(), word) {
+
 					fmt.Printf("\nTest failed: %s is not in %s", word, output)
 					t.Fail()
 				}
 
 			}
+
 		})
 	}
 }

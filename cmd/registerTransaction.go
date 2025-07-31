@@ -44,8 +44,8 @@ var registerTransactionCmd = &cobra.Command{
 		}
 		layout := "02-01-2006"
 		fmt.Println("Transaction added!")
-		fmt.Printf("\nEntry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Cent): %d \n",
-			transactions.ID, transactions.DateTransaction.Format(layout), transactions.Catagory, transactions.Description, transactions.AmmountCent)
+		fmt.Printf("\nEntry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Cent): %d, Transactio type: %s \n",
+			transactions.ID, transactions.DateTransaction.Format(layout), transactions.Catagory, transactions.Description, transactions.AmmountCent, transactions.Type)
 	},
 }
 
