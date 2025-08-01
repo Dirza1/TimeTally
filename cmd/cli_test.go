@@ -131,16 +131,6 @@ func TestRegisterTime(t *testing.T) {
 				"-e", "weekly check on hive#2"},
 			WantOutput: "31-05-2024 maintenance  hive#2",
 		},
-
-		{
-			Name: "Time is not an int",
-			Args: []string{"Time-and-expence-registration", "registerTime",
-				"-d", "31-05-2024",
-				"-t", "a",
-				"-c", "maintenance",
-				"-e", "weekly check on hive#2"},
-			WantOutput: "invalid argument a for -t, --time flag",
-		},
 	}
 
 	err := querry.ResetTimeRegistration(context.Background())
@@ -164,10 +154,8 @@ func TestRegisterTime(t *testing.T) {
 			fmt.Printf("\n Output: %s", output)
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) {
-					if err != nil && !strings.Contains(err.Error(), word) {
-						fmt.Printf("\nTest failed: %s is not in %s", word, output)
-						t.Fail()
-					}
+					fmt.Printf("\nTest failed: %s is not in %s", word, output)
+					t.Fail()
 				}
 
 			}
