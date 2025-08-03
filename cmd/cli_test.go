@@ -19,6 +19,7 @@ type CLITest struct {
 	Name       string
 	Args       []string
 	WantOutput string
+	NotWanted  string
 }
 
 func TestMain(m *testing.M) {
@@ -217,7 +218,6 @@ func TestRegisterTransaction(t *testing.T) {
 			io.Copy(&buf, r)
 			os.Stdout = originalStdout
 			output := buf.String()
-			fmt.Printf("\n Output: %s", output)
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) && err == nil {
 					fmt.Printf("\nTest failed: %s is not in %s", word, output)
@@ -231,6 +231,84 @@ func TestRegisterTransaction(t *testing.T) {
 
 			}
 
+		})
+	}
+}
+
+func TestOverview(t *testing.T) {
+	tests := []CLITest{
+		{
+			Name: "first transaction addition",
+			Args: []string{"Time-and-expence-registration", "registerTransaction",
+				"-d", "16-02-2026",
+				"-a", "300",
+				"-t", "spent",
+				"-c", "glass bottles",
+				"-e", "bought glass bottles"},
+			WantOutput: "16-02-2026. 300, spent glass bottles, bought glass bottles,",
+			NotWanted:  "",
+		},
+		{
+			Name: "First time registration",
+			Args: []string{"Time-and-expence-registration", "registerTime",
+				"-d", "15-01-2025",
+				"-t", "30",
+				"-c", "honney harvest",
+				"-e", "Harvest 4,5 kg of honney from hive#1"},
+			WantOutput: "15-01-2025. honney harvest, 4,5 hive#1,",
+			NotWanted:  "",
+		},
+		{
+			Name: "First time overview",
+			Args: []string{"Time-and-expence-registration", "overview",
+				"-t", "Time"},
+			WantOutput: "15-01-2025. honney harvest, 4,5 hive#1,",
+			NotWanted:  "16-02-2026. 300, spent glass bottles, bought glass bottles,",
+		},
+	}
+	err := querry.ResetTransaction(context.Background())
+	if err != nil {
+		fmt.Printf("Error during time database reset prior to test start: %s", err)
+	}
+	err = querry.ResetTimeRegistration(context.Background())
+	if err != nil {
+		fmt.Printf("Error during financial database reset prior to test start: %s", err)
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			r, w, _ := os.Pipe()
+			originalStdout := os.Stdout
+
+			os.Stdout = w
+			rootCmd.SetArgs(test.Args[1:])
+			err = rootCmd.Execute()
+
+			w.Close()
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			os.Stdout = originalStdout
+			output := buf.String()
+			fmt.Printf("\n\nOutput: %s. Length: %d\n\n", output, len(output))
+			for _, word := range strings.Split(test.WantOutput, " ") {
+				if strings.Contains(output, word) && err == nil {
+					fmt.Printf("Test failed. %s is not in %s", word, output)
+					t.Fail()
+				}
+				if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
+					t.Fail()
+				}
+			}
+			for _, word := range strings.Split(test.NotWanted, " ") {
+				if strings.Contains(output, word) && err == nil {
+					fmt.Printf("Test failed. %s should not be in %s", word, output)
+					t.Fail()
+				}
+				if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
+					t.Fail()
+				}
+			}
 		})
 	}
 }
