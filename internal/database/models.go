@@ -28,3 +28,12 @@ type Timeregistration struct {
 	Description   string
 	Catagory      string
 }
+
+type User struct {
+	ID                     uuid.UUID
+	Name                   string
+	HashedPassword         string
+	AccessFinance          bool
+	AccessTimeregistration bool
+	Administrator          bool
+}
