@@ -234,7 +234,7 @@ func TestOverview(t *testing.T) {
 				"-c", "glass bottles",
 				"-e", "bought glass bottles"},
 			WantOutput: "16-02-2026. 300, spent glass bottles, bought glass bottles,",
-			NotWanted:  "",
+			NotWanted:  "Test",
 		},
 		{
 			Name: "First time registration",
@@ -244,14 +244,63 @@ func TestOverview(t *testing.T) {
 				"-c", "honney harvest",
 				"-e", "Harvest 4,5 kg of honney from hive#1"},
 			WantOutput: "15-01-2025. honney harvest, 4,5 hive#1,",
-			NotWanted:  "",
+			NotWanted:  "Test",
 		},
 		{
 			Name: "First time overview",
 			Args: []string{"Time-and-expence-registration", "overview",
 				"-t", "Time"},
 			WantOutput: "15-01-2025. honney harvest, 4,5 hive#1,",
-			NotWanted:  "16-02-2026. 300, spent glass bottles, bought glass bottles,",
+			NotWanted:  "16-02-2026. 300, glass bottles, bought glass bottles,",
+		},
+		{
+			Name: "First finance overview",
+			Args: []string{"Time-and-expence-registration", "overview",
+				"-t", "Finance"},
+			WantOutput: "16-02-2026. 3.00 glass bottles, bought glass bottles,",
+			NotWanted:  "15-01-2025. honney harvest, 4,5 hive#1,",
+		},
+		{
+			Name: "Incorrect flag used",
+			Args: []string{"Time-and-expence-registration", "overview",
+				"-t", "Incorrect"},
+			WantOutput: "Incorrect use of the -t/ --Type flag. Use Finance or Time after the flag. Be mindfull of capitalisation.",
+			NotWanted:  "15-01-2025. honney harvest, 4,5 hive#1, 16-02-2026. 300, glass bottles, bought glass bottles,",
+		},
+		{
+			Name: "Second time registration",
+			Args: []string{"Time-and-expence-registration", "registerTime",
+				"-d", "25-11-3025",
+				"-t", "11",
+				"-c", "inspection",
+				"-e", "inspected hive#2"},
+			WantOutput: "25-11-3025. inspection, inspected hive#2,",
+			NotWanted:  "Test",
+		},
+		{
+			Name: "second transaction addition",
+			Args: []string{"Time-and-expence-registration", "registerTransaction",
+				"-d", "29-07-2126",
+				"-a", "254",
+				"-t", "gained",
+				"-c", "sale",
+				"-e", "soled expertice"},
+			WantOutput: "29-07-2126. 254, sale, soled expertice,",
+			NotWanted:  "Test",
+		},
+		{
+			Name: "second finance overview",
+			Args: []string{"Time-and-expence-registration", "overview",
+				"-t", "Finance"},
+			WantOutput: "16-02-2026. 3.00 glass bottles, bought glass bottles, 29-07-2126. 2.54  sale, soled expertice,",
+			NotWanted:  "15-01-2025. honney harvest, 4,5 hive#1, 25-11-3025. inspection, inspected hive#2,",
+		},
+		{
+			Name: "second time overview",
+			Args: []string{"Time-and-expence-registration", "overview",
+				"-t", "Time"},
+			WantOutput: "15-01-2025. honney harvest, 4,5 hive#1, 25-11-3025. inspection, inspected hive#2,",
+			NotWanted:  "16-02-2026. 300, glass bottles, bought glass bottles, 29-07-2126. 2.54, sale, soled expertice,",
 		},
 	}
 	err := querry.ResetTransaction(context.Background())
@@ -276,13 +325,11 @@ func TestOverview(t *testing.T) {
 			io.Copy(&buf, r)
 			os.Stdout = originalStdout
 			output := buf.String()
-			fmt.Printf("\n\nOutput: %s. Length: %d\n\n", output, len(output))
 			for _, word := range strings.Split(test.WantOutput, " ") {
-				if strings.Contains(output, word) && err == nil {
+				if !strings.Contains(output, word) && err == nil {
 					fmt.Printf("Test failed. %s is not in %s", word, output)
 					t.Fail()
-				}
-				if err != nil && strings.Contains(err.Error(), word) {
+				} else if err != nil && strings.Contains(err.Error(), word) {
 					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
 					t.Fail()
 				}
@@ -291,8 +338,7 @@ func TestOverview(t *testing.T) {
 				if strings.Contains(output, word) && err == nil {
 					fmt.Printf("Test failed. %s should not be in %s", word, output)
 					t.Fail()
-				}
-				if err != nil && strings.Contains(err.Error(), word) {
+				} else if err != nil && strings.Contains(err.Error(), word) {
 					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
 					t.Fail()
 				}
