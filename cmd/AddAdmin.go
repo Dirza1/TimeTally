@@ -64,7 +64,11 @@ var AddAdminCmd = &cobra.Command{
 			fmt.Println("Password flag error")
 			return
 		}
-		hashedPasword, err := newpasword(newPassword)
+		hashedPasword, err := utils.Hashpassword(newPassword)
+		if err != nil {
+			fmt.Println("Error during pasword hash")
+			return
+		}
 		newAdmin := database.AddAdminParams{
 			Name:           newUserName,
 			HashedPassword: hashedPasword,

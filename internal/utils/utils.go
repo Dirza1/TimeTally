@@ -11,6 +11,7 @@ import (
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type LoggedInUser struct {
@@ -58,4 +59,14 @@ func ReturnLoggedInUser() LoggedInUser {
 	user.Administrator, _ = strconv.ParseBool(os.Getenv("Administrator"))
 
 	return user
+}
+
+func Hashpassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func CompairPaswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
