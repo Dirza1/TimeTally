@@ -2,10 +2,10 @@ package utils
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
@@ -14,11 +14,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type LoggedInUser struct {
-	Name                    string
-	Access_Finance          bool
-	Access_Timeregistration bool
-	Administrator           bool
+type Session struct {
+	UserID   int       `json:"user_id"`
+	LastUsed time.Time `json:"last_used"`
 }
 
 func DatabaseConnection() database.Queries {
@@ -46,21 +44,6 @@ func TimeParse(toParseDate string) time.Time {
 	return Date
 }
 
-func ReturnLoggedInUser() LoggedInUser {
-	user := LoggedInUser{}
-	err := godotenv.Load("../.env")
-	if err != nil {
-		fmt.Printf("Error loading enviromental variables")
-		return user
-	}
-	user.Name = os.Getenv("Name_logged_in")
-	user.Access_Finance, _ = strconv.ParseBool(os.Getenv("Access_finance"))
-	user.Access_Timeregistration, _ = strconv.ParseBool(os.Getenv("Access_timeregistration"))
-	user.Administrator, _ = strconv.ParseBool(os.Getenv("Administrator"))
-
-	return user
-}
-
 func Hashpassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
@@ -69,4 +52,23 @@ func Hashpassword(password string) (string, error) {
 func CompairPaswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func SaveSession(s *Session) error {
+	data, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(".session.json", data, 0600)
+}
+
+func LoadSession() (*Session, error) {
+	data, err := os.ReadFile(".session.json")
+	if err != nil {
+		return nil, err
+	}
+	var s Session
+	err = json.Unmarshal(data, &s)
+	return &s, err
 }

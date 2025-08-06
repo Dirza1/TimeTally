@@ -35,5 +35,9 @@ VALUES(
 RETURNING *;
 
 -- name: Login :one
-SELECT * FROM users
+SELECT name,hashed_password,id FROM users
+WHERE name = $1;
+
+-- name: GetUserPermissions :one
+SELECT access_finance, access_timeregistration, administrator FROM users
 WHERE name = $1;

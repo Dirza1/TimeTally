@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const addAdmin = `-- name: AddAdmin :one
@@ -80,22 +82,39 @@ func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) (User, error) 
 	return i, err
 }
 
-const login = `-- name: Login :one
-SELECT id, name, hashed_password, access_finance, access_timeregistration, administrator FROM users
+const getUserPermissions = `-- name: GetUserPermissions :one
+SELECT access_finance, access_timeregistration, administrator FROM users
 WHERE name = $1
 `
 
-func (q *Queries) Login(ctx context.Context, name string) (User, error) {
+type GetUserPermissionsRow struct {
+	AccessFinance          bool
+	AccessTimeregistration bool
+	Administrator          bool
+}
+
+func (q *Queries) GetUserPermissions(ctx context.Context, name string) (GetUserPermissionsRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserPermissions, name)
+	var i GetUserPermissionsRow
+	err := row.Scan(&i.AccessFinance, &i.AccessTimeregistration, &i.Administrator)
+	return i, err
+}
+
+const login = `-- name: Login :one
+SELECT name,hashed_password,id FROM users
+WHERE name = $1
+`
+
+type LoginRow struct {
+	Name           string
+	HashedPassword string
+	ID             uuid.UUID
+}
+
+func (q *Queries) Login(ctx context.Context, name string) (LoginRow, error) {
 	row := q.db.QueryRowContext(ctx, login, name)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.HashedPassword,
-		&i.AccessFinance,
-		&i.AccessTimeregistration,
-		&i.Administrator,
-	)
+	var i LoginRow
+	err := row.Scan(&i.Name, &i.HashedPassword, &i.ID)
 	return i, err
 }
 
