@@ -48,7 +48,10 @@ var AddAdminCmd = &cobra.Command{
 		}
 
 		queries := utils.DatabaseConnection()
-		currentUser := utils.ReturnLoggedInUser()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
 
 		if currentUser.Administrator != true {
 			fmt.Println("Current user is not an administrator")
