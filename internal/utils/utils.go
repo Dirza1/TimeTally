@@ -9,13 +9,15 @@ import (
 	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Session struct {
-	UserID   int       `json:"user_id"`
+	UserName string    `json:"user_name"`
+	UserID   uuid.UUID `json:"user_id"`
 	LastUsed time.Time `json:"last_used"`
 }
 

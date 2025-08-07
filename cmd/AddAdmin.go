@@ -52,8 +52,12 @@ var AddAdminCmd = &cobra.Command{
 		if err != nil {
 			fmt.Println("Error retrieving current user from session")
 		}
-
-		if currentUser.Administrator != true {
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
+		if permissions.Administrator != true {
 			fmt.Println("Current user is not an administrator")
 			return
 		}
@@ -81,7 +85,7 @@ var AddAdminCmd = &cobra.Command{
 			fmt.Println("Error creating a new user")
 			return
 		}
-		fmt.Printf("\n New Administrator created. ID: %s, Name: %s", created.ID, created.Name)
+		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes there password ASAP!", created.ID, created.Name)
 	},
 }
 

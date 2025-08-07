@@ -13,11 +13,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Session struct {
-	UserID   []uuid.UUIDD `json:"user_id"`
-	LastUsed time.Time    `json:"last_used"`
-}
-
 // LoginCmd represents the Login command
 var LoginCmd = &cobra.Command{
 	Use:   "Login",
@@ -45,8 +40,9 @@ var LoginCmd = &cobra.Command{
 			fmt.Println("Incorrect password supplied")
 			return
 		}
-		s := &Session{
+		s := &utils.Session{
 			UserID:   user.ID,
+			UserName: user.Name,
 			LastUsed: time.Now(),
 		}
 
