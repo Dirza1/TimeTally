@@ -82,6 +82,80 @@ func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) (User, error) 
 	return i, err
 }
 
+const checkOnAdministartor = `-- name: CheckOnAdministartor :many
+SELECT id, name, hashed_password, access_finance, access_timeregistration, administrator FROM users
+WHERE administrator = 1
+`
+
+func (q *Queries) CheckOnAdministartor(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, checkOnAdministartor)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.HashedPassword,
+			&i.AccessFinance,
+			&i.AccessTimeregistration,
+			&i.Administrator,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const createFirstAdministartor = `-- name: CreateFirstAdministartor :one
+INSERT INTO users(id,name,hashed_password,access_finance,access_timeregistration,administrator)
+VALUES(
+    gen_random_UUID(),
+    $1,
+    $2,
+    $3,
+    $4,
+    0
+) 
+RETURNING id, name, hashed_password, access_finance, access_timeregistration, administrator
+`
+
+type CreateFirstAdministartorParams struct {
+	Name                   string
+	HashedPassword         string
+	AccessFinance          bool
+	AccessTimeregistration bool
+}
+
+func (q *Queries) CreateFirstAdministartor(ctx context.Context, arg CreateFirstAdministartorParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createFirstAdministartor,
+		arg.Name,
+		arg.HashedPassword,
+		arg.AccessFinance,
+		arg.AccessTimeregistration,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.HashedPassword,
+		&i.AccessFinance,
+		&i.AccessTimeregistration,
+		&i.Administrator,
+	)
+	return i, err
+}
+
 const getUserPermissions = `-- name: GetUserPermissions :one
 SELECT access_finance, access_timeregistration, administrator FROM users
 WHERE name = $1
