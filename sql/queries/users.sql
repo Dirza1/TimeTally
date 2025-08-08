@@ -48,12 +48,12 @@ VALUES(
     gen_random_UUID(),
     $1,
     $2,
-    $3,
-    $4,
+    1,
+    1,
     0
 ) 
 RETURNING *;
 
 -- name: CheckOnAdministartor :many
-SELECT * FROM users
+SELECT id, name FROM users
 WHERE administrator = 1;

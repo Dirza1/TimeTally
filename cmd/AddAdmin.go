@@ -21,10 +21,12 @@ var AddAdminCmd = &cobra.Command{
 	Long: `This command regesters a new user with administrator privelages. This is the highest level of access avalible.
 	This level shouldd be restricted to as few people as possible to avoid mistakes.
 	
+	
 	This level can:
 	- Add, Update and remove entries from both databases.
 	- Reset both databases.
-	- Generate overviews of both databases`,
+	- Generate overviews of both databases
+	- Create new users`,
 	Run: func(cmd *cobra.Command, args []string) {
 		confirm, err := cmd.Flags().GetString("confirm")
 		if err != nil || confirm != "true" {
@@ -63,7 +65,12 @@ var AddAdminCmd = &cobra.Command{
 		}
 		newUserName, err := cmd.Flags().GetString("username")
 		if err != nil {
-			fmt.Println("Password flag error")
+			fmt.Println("username flag error")
+			return
+		}
+		_, err = queries.GetUserPermissions(context.Background(), newUserName)
+		if err == nil {
+			fmt.Println("Username already exists. Please use another user name or delete old user")
 			return
 		}
 		newPassword, err := cmd.Flags().GetString("newPassword")
@@ -85,7 +92,7 @@ var AddAdminCmd = &cobra.Command{
 			fmt.Println("Error creating a new user")
 			return
 		}
-		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes there password ASAP!", created.ID, created.Name)
+		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes their password ASAP!", created.ID, created.Name)
 	},
 }
 

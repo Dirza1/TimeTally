@@ -83,27 +83,25 @@ func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) (User, error) 
 }
 
 const checkOnAdministartor = `-- name: CheckOnAdministartor :many
-SELECT id, name, hashed_password, access_finance, access_timeregistration, administrator FROM users
+SELECT id, name FROM users
 WHERE administrator = 1
 `
 
-func (q *Queries) CheckOnAdministartor(ctx context.Context) ([]User, error) {
+type CheckOnAdministartorRow struct {
+	ID   uuid.UUID
+	Name string
+}
+
+func (q *Queries) CheckOnAdministartor(ctx context.Context) ([]CheckOnAdministartorRow, error) {
 	rows, err := q.db.QueryContext(ctx, checkOnAdministartor)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []CheckOnAdministartorRow
 	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.HashedPassword,
-			&i.AccessFinance,
-			&i.AccessTimeregistration,
-			&i.Administrator,
-		); err != nil {
+		var i CheckOnAdministartorRow
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -123,27 +121,20 @@ VALUES(
     gen_random_UUID(),
     $1,
     $2,
-    $3,
-    $4,
+    1,
+    1,
     0
 ) 
 RETURNING id, name, hashed_password, access_finance, access_timeregistration, administrator
 `
 
 type CreateFirstAdministartorParams struct {
-	Name                   string
-	HashedPassword         string
-	AccessFinance          bool
-	AccessTimeregistration bool
+	Name           string
+	HashedPassword string
 }
 
 func (q *Queries) CreateFirstAdministartor(ctx context.Context, arg CreateFirstAdministartorParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createFirstAdministartor,
-		arg.Name,
-		arg.HashedPassword,
-		arg.AccessFinance,
-		arg.AccessTimeregistration,
-	)
+	row := q.db.QueryRowContext(ctx, createFirstAdministartor, arg.Name, arg.HashedPassword)
 	var i User
 	err := row.Scan(
 		&i.ID,
