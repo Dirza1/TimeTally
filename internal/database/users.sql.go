@@ -17,9 +17,9 @@ VALUES(
     gen_random_UUID(),
     $1,
     $2,
-    1,
-    1,
-    1
+    TRUE,
+    TRUE,
+    TRUE
 ) 
 RETURNING id, name, hashed_password, access_finance, access_timeregistration, administrator
 `
@@ -84,7 +84,7 @@ func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) (User, error) 
 
 const checkOnAdministartor = `-- name: CheckOnAdministartor :many
 SELECT id, name FROM users
-WHERE administrator = 1
+WHERE administrator = TRUE
 `
 
 type CheckOnAdministartorRow struct {
@@ -121,9 +121,9 @@ VALUES(
     gen_random_UUID(),
     $1,
     $2,
-    1,
-    1,
-    0
+    TRUE,
+    TRUE,
+    TRUE
 ) 
 RETURNING id, name, hashed_password, access_finance, access_timeregistration, administrator
 `

@@ -22,7 +22,7 @@ type Session struct {
 }
 
 func DatabaseConnection() database.Queries {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		fmt.Printf("Error loading enviromental variables")
 		return database.Queries{}

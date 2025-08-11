@@ -23,7 +23,7 @@ var FirstAdminCmd = &cobra.Command{
 		queries := utils.DatabaseConnection()
 		administrators, err := queries.CheckOnAdministartor(context.Background())
 		if err != nil {
-			fmt.Println("Error fetching list of current administrators")
+			fmt.Printf("\nError fetching list of current administrators:\n %s\n", err)
 			return
 		}
 		if len(administrators) != 0 {
@@ -56,7 +56,7 @@ var FirstAdminCmd = &cobra.Command{
 		}
 		created, err := queries.CreateFirstAdministartor(context.Background(), newAdmin)
 		if err != nil {
-			fmt.Println("Error creating a new user")
+			fmt.Printf("\nError creating a new user:\n%s\n", err)
 			return
 		}
 		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes their password ASAP!", created.ID, created.Name)

@@ -26,6 +26,7 @@ var overviewCmd = &cobra.Command{
 		currentUser, err := utils.LoadSession()
 		if err != nil {
 			fmt.Println("Error retrieving current user from session")
+			return
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {

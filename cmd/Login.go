@@ -25,7 +25,7 @@ var LoginCmd = &cobra.Command{
 			fmt.Println("Username flag error")
 			return
 		}
-		password, err := cmd.Flags().GetString("newPassword")
+		password, err := cmd.Flags().GetString("password")
 		if err != nil {
 			fmt.Println("Password flag error")
 			return
@@ -63,8 +63,8 @@ func init() {
 		return
 	}
 
-	LoginCmd.Flags().StringP("newPassword", "n", "", "New password. (required)")
-	err = LoginCmd.MarkFlagRequired("newPassword")
+	LoginCmd.Flags().StringP("password", "p", "", "password. (required)")
+	err = LoginCmd.MarkFlagRequired("password")
 	if err != nil {
 		fmt.Printf("required flag not set")
 		return

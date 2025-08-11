@@ -4,9 +4,9 @@ VALUES(
     gen_random_UUID(),
     $1,
     $2,
-    1,
-    1,
-    1
+    TRUE,
+    TRUE,
+    TRUE
 ) 
 RETURNING *;
 
@@ -46,12 +46,12 @@ VALUES(
     gen_random_UUID(),
     $1,
     $2,
-    1,
-    1,
-    0
+    TRUE,
+    TRUE,
+    TRUE
 ) 
 RETURNING *;
 
 -- name: CheckOnAdministartor :many
 SELECT id, name FROM users
-WHERE administrator = 1;
+WHERE administrator = TRUE;
