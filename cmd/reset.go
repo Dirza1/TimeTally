@@ -45,6 +45,20 @@ var resetCmd = &cobra.Command{
 		}
 		queries := utils.DatabaseConnection()
 
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
+		if permissions.Administrator != true {
+			fmt.Println("Current user is not an administrator")
+			return
+		}
+
 		resetType, err := cmd.Flags().GetString("type")
 		if err != nil {
 			fmt.Println("Type flag error")

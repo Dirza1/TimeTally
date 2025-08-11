@@ -28,6 +28,19 @@ var deleteEntryCmd = &cobra.Command{
 			return
 		}
 		queries := utils.DatabaseConnection()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
+		if permissions.Administrator != true {
+			fmt.Println("Current user is not an administrator")
+			return
+		}
 		switch deleteEntryType {
 		case "Financial":
 			err := queries.DeleteTransaction(context.Background(), ID)

@@ -184,16 +184,14 @@ func (q *Queries) Login(ctx context.Context, name string) (LoginRow, error) {
 }
 
 const updateUser = `-- name: UpdateUser :one
-INSERT INTO users(id,name,hashed_password,access_finance,access_timeregistration,administrator)
-VALUES(
-    gen_random_UUID(),
-    $1,
-    $2,
-    $3,
-    $4,
-    $5
-) 
-RETURNING id, name, hashed_password, access_finance, access_timeregistration, administrator
+UPDATE users
+SET name = $1,
+    hashed_password = $2,
+    access_finance = $3,
+    access_timeregistration = $4,
+    administrator = $5
+WHERE id = $6
+RETURNING name, access_finance,access_timeregistration,administrator
 `
 
 type UpdateUserParams struct {
@@ -202,21 +200,28 @@ type UpdateUserParams struct {
 	AccessFinance          bool
 	AccessTimeregistration bool
 	Administrator          bool
+	ID                     uuid.UUID
 }
 
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+type UpdateUserRow struct {
+	Name                   string
+	AccessFinance          bool
+	AccessTimeregistration bool
+	Administrator          bool
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
 	row := q.db.QueryRowContext(ctx, updateUser,
 		arg.Name,
 		arg.HashedPassword,
 		arg.AccessFinance,
 		arg.AccessTimeregistration,
 		arg.Administrator,
+		arg.ID,
 	)
-	var i User
+	var i UpdateUserRow
 	err := row.Scan(
-		&i.ID,
 		&i.Name,
-		&i.HashedPassword,
 		&i.AccessFinance,
 		&i.AccessTimeregistration,
 		&i.Administrator,

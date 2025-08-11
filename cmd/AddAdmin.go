@@ -6,11 +6,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
-	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -28,27 +26,6 @@ var AddAdminCmd = &cobra.Command{
 	- Generate overviews of both databases
 	- Create new users`,
 	Run: func(cmd *cobra.Command, args []string) {
-		confirm, err := cmd.Flags().GetString("confirm")
-		if err != nil || confirm != "true" {
-			fmt.Println("Confirm flag not set correctly")
-			return
-		}
-		err = godotenv.Load("../.env")
-		if err != nil {
-			fmt.Printf("Error loading enviromental variables")
-			return
-		}
-		password, err := cmd.Flags().GetString("password")
-		if err != nil {
-			fmt.Println("Password flag error")
-			return
-		}
-		setPasword := os.Getenv("reset_password")
-		if setPasword != password {
-			fmt.Println("Incorrect password supplied")
-			return
-		}
-
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
@@ -99,22 +76,8 @@ var AddAdminCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(AddAdminCmd)
 
-	AddAdminCmd.Flags().StringP("confirm", "c", "", "Used to confirm the database delition. Type true after the flag (required)")
-	err := AddAdminCmd.MarkFlagRequired("confirm")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
-
-	AddAdminCmd.Flags().StringP("password", "p", "", "Additional password required for delition. (required)")
-	err = AddAdminCmd.MarkFlagRequired("password")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
-
 	AddAdminCmd.Flags().StringP("username", "u", "", "New username. (required)")
-	err = AddAdminCmd.MarkFlagRequired("username")
+	err := AddAdminCmd.MarkFlagRequired("username")
 	if err != nil {
 		fmt.Printf("required flag not set")
 		return

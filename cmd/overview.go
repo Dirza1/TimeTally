@@ -23,8 +23,21 @@ var overviewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		layout := "02-01-2006"
 		queries := utils.DatabaseConnection()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
 		switch OverviewType {
 		case "Finance":
+			if permissions.AccessFinance != true {
+				fmt.Println("Current user is not allowed in the financial database")
+				return
+			}
 			fmt.Println("Overfiew of the Financial database:")
 			entries, err := queries.OverviewAllTransactions(context.Background())
 			if err != nil {
@@ -37,6 +50,10 @@ var overviewCmd = &cobra.Command{
 			}
 
 		case "Time":
+			if permissions.AccessTimeregistration != true {
+				fmt.Println("Current user is not allowed in the time registration databse")
+				return
+			}
 			fmt.Println("Overview of the Timeregistrations:")
 			entries, err := queries.OverviewAllTime(context.Background())
 			if err != nil {

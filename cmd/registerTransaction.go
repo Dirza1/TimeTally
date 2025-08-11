@@ -26,7 +26,20 @@ var registerTransactionCmd = &cobra.Command{
 	It will require the date of the activity, theamount in cents and what it was spent on.
 	Later this entry is modifiable and deletable.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		query := utils.DatabaseConnection()
+		queries := utils.DatabaseConnection()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
+		if permissions.AccessFinance != true {
+			fmt.Println("Current user is not allowed in the financial database")
+			return
+		}
 		date := utils.TimeParse(registerTransactionDate)
 
 		transaction := database.AddTransactionParams{
@@ -37,7 +50,7 @@ var registerTransactionCmd = &cobra.Command{
 			Catagory:        registerTransactionCatagory,
 		}
 
-		transactions, err := query.AddTransaction(context.Background(), transaction)
+		transactions, err := queries.AddTransaction(context.Background(), transaction)
 		if err != nil {
 			fmt.Printf("error during inserting data into the database: %s \n", err)
 			return

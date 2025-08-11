@@ -35,6 +35,11 @@ var FirstAdminCmd = &cobra.Command{
 			fmt.Println("username flag error")
 			return
 		}
+		_, err = queries.GetUserPermissions(context.Background(), newUserName)
+		if err == nil {
+			fmt.Println("Username already exists. Please use another user name or delete old user")
+			return
+		}
 		newPassword, err := cmd.Flags().GetString("newPassword")
 		if err != nil {
 			fmt.Println("Password flag error")

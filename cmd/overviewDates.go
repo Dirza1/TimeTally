@@ -24,7 +24,17 @@ var overviewDatesCmd = &cobra.Command{
 	One flag sets the datase to be querries and the other two flags specify the dates to querry.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		firstDate := utils.TimeParse(OverviewDatesFirstDate)
-		querry := utils.DatabaseConnection()
+		queries := utils.DatabaseConnection()
+
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
 
 		secondDate := utils.TimeParse(OverviewDatesSecondDate)
 
@@ -32,32 +42,44 @@ var overviewDatesCmd = &cobra.Command{
 		time := database.OverviewTimeDatesParams{}
 		switch OverviewDatesType {
 		case "Finance":
+			if permissions.AccessFinance != true {
+				fmt.Println("Current user is not allowed in the financial database")
+				return
+			}
 			money = database.OverviewTransactionsDateParams{
 				DateTransaction:   firstDate,
 				DateTransaction_2: secondDate,
 			}
 			fmt.Println("Overview op financial databse:")
-			fmt.Println(querry.OverviewTransactionsDate(context.Background(), money))
+			fmt.Println(queries.OverviewTransactionsDate(context.Background(), money))
 		case "Time":
+			if permissions.AccessTimeregistration != true {
+				fmt.Println("Current user is not allowed in the time registration databse")
+				return
+			}
 			time = database.OverviewTimeDatesParams{
 				DateActivity:   firstDate,
 				DateActivity_2: secondDate,
 			}
 			fmt.Println("Overview op timeregistration databse:")
-			fmt.Println(querry.OverviewTimeDates(context.Background(), time))
+			fmt.Println(queries.OverviewTimeDates(context.Background(), time))
 		case "All":
+			if permissions.AccessTimeregistration != true || permissions.AccessFinance != true {
+				fmt.Println("Current user is missing either time or financial access.")
+				return
+			}
 			money = database.OverviewTransactionsDateParams{
 				DateTransaction:   firstDate,
 				DateTransaction_2: secondDate,
 			}
 			fmt.Println("Overview op financial databse:")
-			fmt.Println(querry.OverviewTransactionsDate(context.Background(), money))
+			fmt.Println(queries.OverviewTransactionsDate(context.Background(), money))
 			time = database.OverviewTimeDatesParams{
 				DateActivity:   firstDate,
 				DateActivity_2: secondDate,
 			}
 			fmt.Println("Overview op timeregistration databse:")
-			fmt.Println(querry.OverviewTimeDates(context.Background(), time))
+			fmt.Println(queries.OverviewTimeDates(context.Background(), time))
 		default:
 			fmt.Println("Incorrect use of the type flag. Use Finance, Time or All. Pay mind to the capitalation.")
 		}

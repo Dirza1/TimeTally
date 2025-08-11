@@ -32,8 +32,21 @@ var registerTimeCmd = &cobra.Command{
 			Description:   registerTimeDescription,
 			Catagory:      registerTimeCategory,
 		}
-		query := utils.DatabaseConnection()
-		entry, err := query.AddTimeRegistration(context.Background(), time)
+		queries := utils.DatabaseConnection()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
+		if permissions.AccessTimeregistration != true {
+			fmt.Println("Current user is not allowed in the time registartion database")
+			return
+		}
+		entry, err := queries.AddTimeRegistration(context.Background(), time)
 		if err != nil {
 			fmt.Printf("error during inserting data into the database: %s \n", err)
 			return

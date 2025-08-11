@@ -40,8 +40,21 @@ var updateTimeCmd = &cobra.Command{
 			Catagory:      updateTimeCmdCategory,
 			ID:            ID,
 		}
-		query := utils.DatabaseConnection()
-		entry, err := query.UpdateTime(context.Background(), time)
+		queries := utils.DatabaseConnection()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
+		if permissions.Administrator != true {
+			fmt.Println("Current user is not an administrator")
+			return
+		}
+		entry, err := queries.UpdateTime(context.Background(), time)
 		if err != nil {
 			fmt.Printf("error during updating of the entry: %s \n", err)
 			return

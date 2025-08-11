@@ -29,7 +29,21 @@ var updateTransactionCmd = &cobra.Command{
 	Later this entry is modifiable and deletable.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		layout := "02-01-2006"
-		query := utils.DatabaseConnection()
+
+		queries := utils.DatabaseConnection()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
+		if permissions.Administrator != true {
+			fmt.Println("Current user is not an administrator")
+			return
+		}
 
 		ID, err := uuid.Parse(updateTransactionID)
 		if err != nil {
@@ -45,7 +59,7 @@ var updateTransactionCmd = &cobra.Command{
 			ID:              ID,
 		}
 
-		transactions, err := query.UpdateTransaction(context.Background(), transaction)
+		transactions, err := queries.UpdateTransaction(context.Background(), transaction)
 		if err != nil {
 			fmt.Printf("error during updating of the entry: %s \n", err)
 			return

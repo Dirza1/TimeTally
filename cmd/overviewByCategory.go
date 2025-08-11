@@ -22,10 +22,23 @@ var overviewByCategoryCmd = &cobra.Command{
 	This comand requires two flags. One to specify the database to querry and one to specify the catagory being looked for.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		layout := "02-01-2006"
-		query := utils.DatabaseConnection()
+		queries := utils.DatabaseConnection()
+		currentUser, err := utils.LoadSession()
+		if err != nil {
+			fmt.Println("Error retrieving current user from session")
+		}
+		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		if err != nil {
+			fmt.Println("Error during retrieval of user permissions from database")
+			return
+		}
 		switch overviewByCategoryType {
 		case "Financial":
-			entries, err := query.OverviewTransactionByCatagory(context.Background(), overviewByCategoryCategory)
+			if permissions.AccessFinance != true {
+				fmt.Println("Current user is not allowed in the financial database")
+				return
+			}
+			entries, err := queries.OverviewTransactionByCatagory(context.Background(), overviewByCategoryCategory)
 			if err != nil {
 				fmt.Printf("error during fetching of data: %s \n", err)
 				return
@@ -36,7 +49,11 @@ var overviewByCategoryCmd = &cobra.Command{
 					entry.ID, entry.DateTransaction.Format(layout), entry.Catagory, entry.Description, entry.Amount)
 			}
 		case "Time":
-			entries, err := query.OverviewTimeByCatagory(context.Background(), overviewByCategoryCategory)
+			if permissions.AccessTimeregistration != true {
+				fmt.Println("Current user is allowed in the time registration databse")
+				return
+			}
+			entries, err := queries.OverviewTimeByCatagory(context.Background(), overviewByCategoryCategory)
 			if err != nil {
 				fmt.Printf("error during fetching of data: %s \n", err)
 				return
