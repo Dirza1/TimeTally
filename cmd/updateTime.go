@@ -51,10 +51,12 @@ var updateTimeCmd = &cobra.Command{
 		session, err := utils.LoadSession()
 		if err != nil {
 			fmt.Printf("\nError loading session. Err:\n%s\n", err)
+			return
 		}
 		currentTime := time.Now()
 		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
 			fmt.Println("Users session expired. Please use the login command to continue using the system")
+			return
 		}
 		layout := "02-01-2006"
 		ID, err := uuid.Parse(updateTimeID)
