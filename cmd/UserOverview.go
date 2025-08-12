@@ -1,12 +1,14 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +23,32 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("UserOverview called")
+		session, err := utils.LoadSession()
+		if err != nil {
+			fmt.Printf("\nError loading session. Err:\n%s\n", err)
+			return
+		}
+		currentTime := time.Now()
+		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
+			fmt.Println("Users session expired. Please use the login command to continue using the system")
+			return
+		}
+
+		queries := utils.DatabaseConnection()
+		users, err := queries.UserOverview(context.Background())
+		if err != nil {
+			fmt.Printf("\nError retrieving users from database. Err:\n%s\n", err)
+			return
+		}
+		fmt.Println("Current users:")
+		for _, user := range users {
+			fmt.Printf("Name: %s, ID: %s, Time access: %t, Financial access: %t, Administrator: %t",
+				user.Name,
+				user.ID,
+				user.AccessTimeregistration,
+				user.AccessFinance,
+				user.Administrator)
+		}
 	},
 }
 

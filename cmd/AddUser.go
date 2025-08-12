@@ -75,21 +75,12 @@ to quickly create a Cobra application.`,
 			fmt.Printf("\nError during pasword hash. Err:\n%s\n", err)
 			return
 		}
-		finance, err := cmd.Flags().GetBool("AccessFinance")
-		if err != nil {
-			fmt.Printf("\nError during finance flag retrieval. Err:\n%s\n", err)
-			return
-		}
-		time, err := cmd.Flags().GetBool("AccessTime")
-		if err != nil {
-			fmt.Printf("\nError during time flag retrieval. Err:\n%s\n", err)
-			return
-		}
+
 		newUser := database.AddUserParams{
 			Name:                   newUserUsername,
 			HashedPassword:         hashedPasword,
-			AccessFinance:          finance,
-			AccessTimeregistration: time,
+			AccessFinance:          newUserAccessFinance,
+			AccessTimeregistration: newUserAccessTime,
 		}
 		createdUser, err := queries.AddUser(context.Background(), newUser)
 		if err != nil {

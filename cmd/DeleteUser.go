@@ -1,33 +1,72 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
+
+var toDeleteID string
 
 // DeleteUserCmd represents the DeleteUser command
 var DeleteUserCmd = &cobra.Command{
 	Use:   "DeleteUser",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "This command deletes a user",
+	Long: `If a user is no longer required to have access to this program their account can be deleted.
+	This action can only be performed by an administrator.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("DeleteUser called")
+		if toDeleteID == "" {
+			fmt.Println("-i or --id flag not set. Provied the ID of the user to be deleted")
+			return
+		}
+		session, err := utils.LoadSession()
+		if err != nil {
+			fmt.Printf("\n Error loading user session. Err:\n%s\n", err)
+			return
+		}
+		currentTime := time.Now()
+		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
+			fmt.Println("Users session expired. Please use the login command to continue using the system")
+			return
+		}
+
+		queries := utils.DatabaseConnection()
+		permissions, err := queries.GetUserPermissions(context.Background(), session.UserName)
+		if err != nil {
+			fmt.Printf("\nError retrieving user permissions. Err:\n%s\n", err)
+			return
+		}
+		if permissions.Administrator != true {
+			fmt.Println("Current user is not an administrator.")
+			return
+		}
+		ID, err := uuid.Parse(toDeleteID)
+		if err != nil {
+			fmt.Printf("\nerror during parsing of the ID: %s \n", err)
+			return
+		}
+
+		err = queries.DeleteUser(context.Background(), ID)
+		if err != nil {
+			fmt.Printf("\nError during deletion of user. Err:\n%s\n", err)
+			return
+		}
+		fmt.Println("User deleted.")
+		utils.UpdateSession()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(DeleteUserCmd)
 
+	deleteEntryCmd.Flags().StringVarP(&toDeleteID, "id", "i", "", "The ID of the user to be deleted.")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

@@ -147,6 +147,16 @@ func (q *Queries) CreateFirstAdministartor(ctx context.Context, arg CreateFirstA
 	return i, err
 }
 
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users *
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	return err
+}
+
 const getUserPermissions = `-- name: GetUserPermissions :one
 SELECT access_finance, access_timeregistration, administrator FROM users
 WHERE name = $1
@@ -227,4 +237,38 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 		&i.Administrator,
 	)
 	return i, err
+}
+
+const userOverview = `-- name: UserOverview :many
+SELECT id, name, hashed_password, access_finance, access_timeregistration, administrator FROM users
+`
+
+func (q *Queries) UserOverview(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, userOverview)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.HashedPassword,
+			&i.AccessFinance,
+			&i.AccessTimeregistration,
+			&i.Administrator,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
