@@ -20,7 +20,7 @@ var loginPassword string
 var LoginCmd = &cobra.Command{
 	Use:   "Login",
 	Short: "A command to login to a session",
-	Long: `This command will create a session with the suppyed user.
+	Long: `This command will create a session with the supplied user.
 	This session is used to check permissions when executing commands`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if loginUsername == "" {
@@ -52,6 +52,7 @@ var LoginCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("Login Successful")
 	},
 }
 

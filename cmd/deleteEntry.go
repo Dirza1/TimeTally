@@ -21,13 +21,14 @@ var deleteEntryCmd = &cobra.Command{
 	Use:   "deleteEntry",
 	Short: "Deletes a entry from the Time or Financial database",
 	Long: `This command deletes a registration from the Time or Financial database.
-	Set the ID of the registration to be deleted`,
+	This action can only be performed by an administrator.
+	Set the ID of the registration to be deleted and which database it needs to be deleted from.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if deleteEntryType == "" {
 			fmt.Println("-t or --type flag not set. Please set this flag")
 		}
 		if deleteEntryId == "" {
-			fmt.Println("-i or --id flag not set. Please set this flag")
+			fmt.Println("-e or --entry-id flag not set. Please set this flag")
 		}
 		session, err := utils.LoadSession()
 		if err != nil {
@@ -88,7 +89,7 @@ func init() {
 
 	deleteEntryCmd.Flags().StringVarP(&deleteEntryType, "type", "t", "", "A flag to diferatiate between the databases. Use either Financial or Time after the flag")
 
-	deleteEntryCmd.Flags().StringVarP(&deleteEntryId, "id", "i", "", "A flag to set the ID of the registrations that needs to be deleted")
+	deleteEntryCmd.Flags().StringVarP(&deleteEntryId, "entry-id", "e", "", "A flag to set the ID of the registrations that needs to be deleted")
 
 	// Here you will define your flags and configuration settings.
 

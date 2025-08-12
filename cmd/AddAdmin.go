@@ -19,10 +19,9 @@ var addadminPassword string
 // AddAdminCmd represents the AddAdmin command
 var AddAdminCmd = &cobra.Command{
 	Use:   "AddAdmin",
-	Short: "Add a user with administrator priveligaes",
-	Long: `This command regesters a new user with administrator privelages. This is the highest level of access avalible.
-	This level shouldd be restricted to as few people as possible to avoid mistakes.
-	
+	Short: "Add a user with administrator privileges",
+	Long: `This command registers a new user with administrator privileges. This is the highest level of access availble.
+	This level should be restricted to as few people as possible to avoid mistakes.
 	
 	This level can:
 	- Add, Update and remove entries from both databases.

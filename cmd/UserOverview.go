@@ -15,13 +15,9 @@ import (
 // UserOverviewCmd represents the UserOverview command
 var UserOverviewCmd = &cobra.Command{
 	Use:   "UserOverview",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Genmerate a user overview",
+	Long: `This command generates a overview of the active users in the user database.
+	It will return a list of all users, id's and privileges.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		session, err := utils.LoadSession()
 		if err != nil {
@@ -42,7 +38,7 @@ to quickly create a Cobra application.`,
 		}
 		fmt.Println("Current users:")
 		for _, user := range users {
-			fmt.Printf("Name: %s, ID: %s, Time access: %t, Financial access: %t, Administrator: %t",
+			fmt.Printf("Name: %s, ID: %s, Time access: %t, Financial access: %t, Administrator: %t\n",
 				user.Name,
 				user.ID,
 				user.AccessTimeregistration,

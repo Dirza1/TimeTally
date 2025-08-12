@@ -21,7 +21,8 @@ var FirstAdminCmd = &cobra.Command{
 	Short: "This command adds an administrator if none exist",
 	Long: `During first instalation or if no admin exists within the database this command makes a new administrator.
 	This command only works when no administrator exists yet in the database.
-	Always ensure there is a backup administrator as this command does not work if any administrator accounts exist within the database`,
+	Always ensure there is a backup administrator as this command does not work if any administrator accounts exist within the database.
+	Should no active administrators be avalible manual intervention in the database is required. AVOID THIS AT ALL COSTS!`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if firstAdminUsername == "" {
 			fmt.Println("-u or --username flag not set. Please set this flag")

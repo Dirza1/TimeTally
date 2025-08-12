@@ -45,7 +45,7 @@ var updateTimeCmd = &cobra.Command{
 			return
 		}
 		if updateTimeID == "" {
-			fmt.Printf("\n-i or --id flag not set. Please supply a ID to update\n")
+			fmt.Printf("\n-i or --time-id flag not set. Please supply a ID to update\n")
 			return
 		}
 		session, err := utils.LoadSession()
@@ -108,7 +108,7 @@ func init() {
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeCmdDescription, "description", "e", "", "Flag to specify the description of the work performed.")
 
-	updateTimeCmd.Flags().StringVarP(&updateTimeID, "id", "i", "", "Flag to specify the ID of the work performed.")
+	updateTimeCmd.Flags().StringVarP(&updateTimeID, "time-id", "i", "", "Flag to specify the ID of the work performed.")
 
 	// Here you will define your flags and configuration settings.
 

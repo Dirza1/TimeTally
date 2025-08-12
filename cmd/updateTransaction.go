@@ -24,7 +24,7 @@ var updateTransactionID string
 
 var updateTransactionCmd = &cobra.Command{
 	Use:   "updateTransaction",
-	Short: "A brief description of your command",
+	Short: "Update a financiaal transaction within the database",
 	Long: `This command will allow you to update a transaction.
 	It will require the date of the activity, theamount in cents and what it was spent on.
 	Later this entry is modifiable and deletable.`,
@@ -50,7 +50,7 @@ var updateTransactionCmd = &cobra.Command{
 			return
 		}
 		if updateTransactionID == "" {
-			fmt.Printf("\n-i or --id flag not set. Please supply a ID to update\n")
+			fmt.Printf("\n-i or --transaction-id flag not set. Please supply a ID to update\n")
 			return
 		}
 		session, err := utils.LoadSession()
@@ -119,7 +119,7 @@ func init() {
 
 	updateTransactionCmd.Flags().StringVarP(&updateTransactionCatagory, "catagory", "c", "", "Flag denote the catagory of the transaction. Use a project for the name.")
 
-	updateTransactionCmd.Flags().StringVarP(&updateTransactionID, "id", "i", "", "Flag denote the ID of the transaction.")
+	updateTransactionCmd.Flags().StringVarP(&updateTransactionID, "transaction-id", "i", "", "Flag denote the ID of the transaction.")
 
 	// Here you will define your flags and configuration settings.
 

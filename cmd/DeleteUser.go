@@ -20,10 +20,11 @@ var DeleteUserCmd = &cobra.Command{
 	Use:   "DeleteUser",
 	Short: "This command deletes a user",
 	Long: `If a user is no longer required to have access to this program their account can be deleted.
-	This action can only be performed by an administrator.`,
+	This action can only be performed by an administrator.
+	Note this only removed a user from the user database. Entries in the Financial or Time database will still exist.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if toDeleteID == "" {
-			fmt.Println("-i or --id flag not set. Provied the ID of the user to be deleted")
+			fmt.Println("-i or --user-id flag not set. Provide the ID of the user to be deleted")
 			return
 		}
 		session, err := utils.LoadSession()
@@ -66,7 +67,7 @@ var DeleteUserCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(DeleteUserCmd)
 
-	deleteEntryCmd.Flags().StringVarP(&toDeleteID, "id", "i", "", "The ID of the user to be deleted.")
+	deleteEntryCmd.Flags().StringVarP(&toDeleteID, "user-id", "i", "", "The ID of the user to be deleted.")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
