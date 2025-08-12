@@ -22,19 +22,26 @@ var deleteEntryCmd = &cobra.Command{
 	Long: `This command deletes a registration from the Time or Financial database.
 	Set the ID of the registration to be deleted`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if deleteEntryType == "" {
+			fmt.Println("-t or --type flag not set. Please set this flag")
+		}
+		if deleteEntryId == "" {
+			fmt.Println("-i or --id flag not set. Please set this flag")
+		}
+
 		ID, err := uuid.Parse(deleteEntryId)
 		if err != nil {
-			fmt.Printf("error during parsing of ID: %s \n", err)
+			fmt.Printf("\nerror during parsing of ID: %s \n", err)
 			return
 		}
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err:\n%s\n", err)
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err:\n%s\n", err)
 			return
 		}
 		if permissions.Administrator != true {
@@ -45,14 +52,14 @@ var deleteEntryCmd = &cobra.Command{
 		case "Financial":
 			err := queries.DeleteTransaction(context.Background(), ID)
 			if err != nil {
-				fmt.Printf("error during deletion: %s \n", err)
+				fmt.Printf("\nerror during deletion: %s \n", err)
 				return
 			}
 			fmt.Println("Entry deleted")
 		case "Time":
 			err := queries.DeleteTime(context.Background(), ID)
 			if err != nil {
-				fmt.Printf("error during deletion: %s \n", err)
+				fmt.Printf("\nerror during deletion: %s \n", err)
 				return
 			}
 			fmt.Println("Entry deleted")
@@ -67,18 +74,9 @@ func init() {
 	rootCmd.AddCommand(deleteEntryCmd)
 
 	deleteEntryCmd.Flags().StringVarP(&deleteEntryType, "type", "t", "", "A flag to diferatiate between the databases. Use either Financial or Time after the flag")
-	err := deleteEntryCmd.MarkFlagRequired("type")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	deleteEntryCmd.Flags().StringVarP(&deleteEntryId, "id", "i", "", "A flag to set the ID of the registrations that needs to be deleted")
-	err = deleteEntryCmd.MarkFlagRequired("id")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

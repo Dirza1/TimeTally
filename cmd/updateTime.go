@@ -27,10 +27,31 @@ var updateTimeCmd = &cobra.Command{
 	It will require the date of the activity, the time spent in minutes and what it was spent on.
 	Later this entry is modifiable and deletable.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if updateTimeCmdDate == "" {
+			fmt.Printf("\n -d or --date flag was not set. Please set a correct date\n")
+			return
+		}
+		if updateTimeCmdMinutes == 0 {
+			fmt.Printf("\n Either the -t or --time flag was not set, or 0 minutes was filled in. Either ensure the flag is set, or register a minimum of 1 cent\n")
+			return
+		}
+		if updateTimeCmdDescription == "" {
+			fmt.Printf("\n-e or --description flag is not set. Ensure a description is given to the time registration\n")
+			return
+		}
+		if updateTimeCmdCategory == "" {
+			fmt.Printf("\n-c or --category flag not set. Ensure category is set for the time registration\n")
+			return
+		}
+		if updateTimeID == "" {
+			fmt.Printf("\n-i or --id flag not set. Please supply a ID to update\n")
+			return
+		}
+
 		layout := "02-01-2006"
 		ID, err := uuid.Parse(updateTimeID)
 		if err != nil {
-			fmt.Printf("error during parsing of the ID: %s \n", err)
+			fmt.Printf("\nerror during parsing of the ID: %s \n", err)
 			return
 		}
 		time := database.UpdateTimeParams{
@@ -43,11 +64,11 @@ var updateTimeCmd = &cobra.Command{
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err: \n%s\n", err)
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err: \n%s\n", err)
 			return
 		}
 		if permissions.Administrator != true {
@@ -56,11 +77,11 @@ var updateTimeCmd = &cobra.Command{
 		}
 		entry, err := queries.UpdateTime(context.Background(), time)
 		if err != nil {
-			fmt.Printf("error during updating of the entry: %s \n", err)
+			fmt.Printf("\nerror during updating of the entry: %s \n", err)
 			return
 		}
 		fmt.Println("Time updated to: ")
-		fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %d \n",
+		fmt.Printf("\nEntry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %d \n",
 			entry.ID, entry.DateActivity.Format(layout), entry.Catagory, entry.Description, entry.LengthMinutes)
 	},
 }
@@ -69,39 +90,14 @@ func init() {
 	rootCmd.AddCommand(updateTimeCmd)
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeCmdDate, "date", "d", "", "Flag to specify the date worked on a project. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	err := updateTimeCmd.MarkFlagRequired("date")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	updateTimeCmd.Flags().Int32VarP(&updateTimeCmdMinutes, "time", "t", 0, "Flag to specify the amount of time worked on a project in minutes.")
-	err = updateTimeCmd.MarkFlagRequired("time")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeCmdCategory, "category", "c", "", "Flag to specify the category/project name of the project.")
-	err = updateTimeCmd.MarkFlagRequired("category")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeCmdDescription, "description", "e", "", "Flag to specify the description of the work performed.")
-	err = updateTimeCmd.MarkFlagRequired("description")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	updateTimeCmd.Flags().StringVarP(&updateTimeID, "id", "i", "", "Flag to specify the ID of the work performed.")
-	err = updateTimeCmd.MarkFlagRequired("id")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	// Here you will define your flags and configuration settings.
 

@@ -23,16 +23,29 @@ var overviewDatesCmd = &cobra.Command{
 	Long: `This command returns an overview of one or both of the databaases entries between the two specified dates.
 	One flag sets the datase to be querries and the other two flags specify the dates to querry.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if OverviewDatesType == "" {
+			fmt.Println("-t or --type flag not set. Please use this flag")
+			return
+		}
+		if OverviewDatesFirstDate == "" {
+			fmt.Println("-f or --first-date flag not set. Please use this flag")
+			return
+		}
+		if OverviewDatesSecondDate == "" {
+			fmt.Println("-s or --second-date flag not set. Please use this flag")
+			return
+		}
+
 		firstDate := utils.TimeParse(OverviewDatesFirstDate)
 		queries := utils.DatabaseConnection()
 
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err:\n%s\n", err)
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err:\n%s\n", err)
 			return
 		}
 
@@ -90,25 +103,10 @@ func init() {
 	rootCmd.AddCommand(overviewDatesCmd)
 
 	overviewDatesCmd.Flags().StringVarP(&OverviewDatesType, "type", "t", "all", "Flag to specify the database to querry. Use Finance, Time or All after the flag")
-	err := overviewDatesCmd.MarkFlagRequired("type")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
-	overviewDatesCmd.Flags().StringVarP(&OverviewDatesFirstDate, "First-Date", "f", "", "Flag to specify the first date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	err = overviewDatesCmd.MarkFlagRequired("month")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	overviewDatesCmd.Flags().StringVarP(&OverviewDatesFirstDate, "first-date", "f", "", "Flag to specify the first date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
 
-	overviewDatesCmd.Flags().StringVarP(&OverviewDatesSecondDate, "Second-Date", "s", "", "Flag to specify the second date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	err = overviewDatesCmd.MarkFlagRequired("year")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	overviewDatesCmd.Flags().StringVarP(&OverviewDatesSecondDate, "second-date", "s", "", "Flag to specify the second date to querry. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
 
 	// Here you will define your flags and configuration settings.
 

@@ -12,6 +12,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var firstAdminUsername string
+var firstAdminPassword string
+
 // FirstAdminCmd represents the FirstAdmin command
 var FirstAdminCmd = &cobra.Command{
 	Use:   "FirstAdmin",
@@ -20,6 +23,13 @@ var FirstAdminCmd = &cobra.Command{
 	This command only works when no administrator exists yet in the database.
 	Always ensure there is a backup administrator as this command does not work if any administrator accounts exist within the database`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if firstAdminUsername == "" {
+			fmt.Println("-u or --username flag not set. Please set this flag")
+		}
+		if firstAdminPassword == "" {
+			fmt.Println("-p or --newPassword flag not set. Please set this flag")
+		}
+
 		queries := utils.DatabaseConnection()
 		administrators, err := queries.CheckOnAdministartor(context.Background())
 		if err != nil {
@@ -30,28 +40,20 @@ var FirstAdminCmd = &cobra.Command{
 			fmt.Println("There are administrators in the system. Please ask them to generate accounts as required")
 			return
 		}
-		newUserName, err := cmd.Flags().GetString("username")
-		if err != nil {
-			fmt.Println("username flag error")
-			return
-		}
-		_, err = queries.GetUserPermissions(context.Background(), newUserName)
+
+		_, err = queries.GetUserPermissions(context.Background(), firstAdminUsername)
 		if err == nil {
 			fmt.Println("Username already exists. Please use another user name or delete old user")
 			return
 		}
-		newPassword, err := cmd.Flags().GetString("newPassword")
+
+		hashedPasword, err := utils.Hashpassword(firstAdminPassword)
 		if err != nil {
-			fmt.Println("Password flag error")
-			return
-		}
-		hashedPasword, err := utils.Hashpassword(newPassword)
-		if err != nil {
-			fmt.Println("Error during pasword hash")
+			fmt.Printf("\nError during pasword hash. Err:\n%s\n", err)
 			return
 		}
 		newAdmin := database.CreateFirstAdministartorParams{
-			Name:           newUserName,
+			Name:           firstAdminUsername,
 			HashedPassword: hashedPasword,
 		}
 		created, err := queries.CreateFirstAdministartor(context.Background(), newAdmin)
@@ -66,19 +68,10 @@ var FirstAdminCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(FirstAdminCmd)
 
-	FirstAdminCmd.Flags().StringP("username", "u", "", "New username. (required)")
-	err := FirstAdminCmd.MarkFlagRequired("username")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	FirstAdminCmd.Flags().StringVarP(&firstAdminUsername, "username", "u", "", "New username. (required)")
 
-	FirstAdminCmd.Flags().StringP("newPassword", "n", "", "New password. (required)")
-	err = FirstAdminCmd.MarkFlagRequired("newPassword")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	FirstAdminCmd.Flags().StringVarP(&firstAdminPassword, "newPassword", "p", "", "New password. (required)")
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

@@ -15,6 +15,10 @@ import (
 
 // resetCmd represents the reset command
 
+var resetType string
+var resetConform string
+var resetPassword string
+
 var resetCmd = &cobra.Command{
 	Use:   "reset",
 	Short: "Removes all data from the finance and or timeregistration ddatabase",
@@ -23,19 +27,30 @@ var resetCmd = &cobra.Command{
 	Execution of this command requires an additional password to protect against axidental use.
 	Additionaly this command uses 3 required flags for the database to be deleted, confirming to delete and the password.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		confirm, err := cmd.Flags().GetString("confirm")
-		if err != nil || confirm != "true" {
+		if resetConform == "" {
+			fmt.Printf("\n-c or --confirm flag not set. Please set the confirm flag\n")
+			return
+		}
+		if resetType == "" {
+			fmt.Printf("\n-t or --type flag not set. Please set the type flag\n")
+			return
+		}
+		if resetPassword == "" {
+			fmt.Printf("\n-p or --pasword flag not set. Please provide the reset pasword\n")
+		}
+
+		if resetConform != "true" {
 			fmt.Println("Confirm flag not set correctly")
 			return
 		}
-		err = godotenv.Load("../.env")
+		err := godotenv.Load(".env")
 		if err != nil {
-			fmt.Printf("Error loading enviromental variables")
+			fmt.Printf("\nError loading enviromental variables. Err: \n%s\n", err)
 			return
 		}
 		password, err := cmd.Flags().GetString("password")
 		if err != nil {
-			fmt.Println("Password flag error")
+			fmt.Printf("\nPassword flag error. Err: \n%s\n", err)
 			return
 		}
 		setPasword := os.Getenv("reset_password")
@@ -47,11 +62,12 @@ var resetCmd = &cobra.Command{
 
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err: \n%s\n", err)
+			return
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err: \n%s\n", err)
 			return
 		}
 		if permissions.Administrator != true {
@@ -61,7 +77,7 @@ var resetCmd = &cobra.Command{
 
 		resetType, err := cmd.Flags().GetString("type")
 		if err != nil {
-			fmt.Println("Type flag error")
+			fmt.Printf("\nType flag error. Err: \n%s\n", err)
 			return
 		}
 
@@ -69,26 +85,26 @@ var resetCmd = &cobra.Command{
 		case "Finance":
 			err := queries.ResetTransaction(context.Background())
 			if err != nil {
-				fmt.Printf("error during reset: %s \n", err)
+				fmt.Printf("\nerror during reset: %s \n", err)
 				return
 			}
 			fmt.Println("reset called on finance")
 		case "Time":
 			err := queries.ResetTimeRegistration(context.Background())
 			if err != nil {
-				fmt.Printf("error during reset: %s \n", err)
+				fmt.Printf("\nerror during reset: %s \n", err)
 				return
 			}
 			fmt.Println("reset called on time")
 		case "All":
 			err := queries.ResetTimeRegistration(context.Background())
 			if err != nil {
-				fmt.Printf("error during reset: %s \n", err)
+				fmt.Printf("\nerror during reset: %s \n", err)
 				return
 			}
 			err = queries.ResetTransaction(context.Background())
 			if err != nil {
-				fmt.Printf("error during reset: %s \n", err)
+				fmt.Printf("\nerror during reset: %s \n", err)
 				return
 			}
 			fmt.Println("reset called on all")
@@ -101,26 +117,11 @@ var resetCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(resetCmd)
 
-	resetCmd.Flags().StringP("type", "t", "", "Used to diferenciate which database needs to be deleted. Use Finance, Time or all as input. (required)")
-	err := resetCmd.MarkFlagRequired("type")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	resetCmd.Flags().StringVarP(&resetType, "type", "t", "", "Used to diferenciate which database needs to be deleted. Use Finance, Time or all as input. (required)")
 
-	resetCmd.Flags().StringP("confirm", "c", "", "Used to confirm the database delition. Type true after the flag (required)")
-	err = resetCmd.MarkFlagRequired("confirm")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	resetCmd.Flags().StringVarP(&resetConform, "confirm", "c", "", "Used to confirm the database delition. Type true after the flag (required)")
 
-	resetCmd.Flags().StringP("password", "p", "", "Additional password required for delition. (required)")
-	err = resetCmd.MarkFlagRequired("password")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	resetCmd.Flags().StringVarP(&resetPassword, "password", "p", "", "Additional password required for delition. (required)")
 
 	// Here you will define your flags and configuration settings.
 

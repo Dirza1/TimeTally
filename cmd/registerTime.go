@@ -25,6 +25,22 @@ var registerTimeCmd = &cobra.Command{
 	It will require the date of the activity, the time spent in minutes and what it was spent on.
 	Later this entry is modifiable and deletable.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if registerTimeDate == "" {
+			fmt.Printf("\n -d or --date flag was not set. Please set a correct date\n")
+			return
+		}
+		if registerTimeMinutes == 0 {
+			fmt.Printf("\n Either the -t or --time flag was not set, or 0 minutes was filled in. Either ensure the flag is set, or register a minimum of 1 cent\n")
+			return
+		}
+		if registerTimeDescription == "" {
+			fmt.Printf("\n-e or --description flag is not set. Ensure a description is given to the time registration\n")
+			return
+		}
+		if registerTimeCategory == "" {
+			fmt.Printf("\n-c or --category flag not set. Ensure category is set for the time registration\n")
+			return
+		}
 
 		time := database.AddTimeRegistrationParams{
 			DateActivity:  utils.TimeParse(registerTimeDate),
@@ -35,11 +51,11 @@ var registerTimeCmd = &cobra.Command{
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err:\n%s\n", err)
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err:\n%s\n", err)
 			return
 		}
 		if permissions.AccessTimeregistration != true {
@@ -48,7 +64,7 @@ var registerTimeCmd = &cobra.Command{
 		}
 		entry, err := queries.AddTimeRegistration(context.Background(), time)
 		if err != nil {
-			fmt.Printf("error during inserting data into the database: %s \n", err)
+			fmt.Printf("\nerror during inserting data into the database: \n%s \n", err)
 			return
 		}
 		layout := "02-01-2006"
@@ -63,32 +79,12 @@ func init() {
 	rootCmd.AddCommand(registerTimeCmd)
 
 	registerTimeCmd.Flags().StringVarP(&registerTimeDate, "date", "d", "", "Flag to specify the date worked on a project. Use full date notateion. e.g. 22-11-2025 for 22 november 2025")
-	err := registerTimeCmd.MarkFlagRequired("date")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	registerTimeCmd.Flags().Int32VarP(&registerTimeMinutes, "time", "t", 0, "Flag to specify the amount of time worked on a project in minutes.")
-	err = registerTimeCmd.MarkFlagRequired("time")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	registerTimeCmd.Flags().StringVarP(&registerTimeCategory, "category", "c", "", "Flag to specify the category/project name of the project.")
-	err = registerTimeCmd.MarkFlagRequired("category")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	registerTimeCmd.Flags().StringVarP(&registerTimeDescription, "description", "e", "", "Flag to specify the description of the work performed.")
-	err = registerTimeCmd.MarkFlagRequired("description")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	// Here you will define your flags and configuration settings.
 

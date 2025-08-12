@@ -12,6 +12,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var newUserUsername string
+var newUserPassword string
+var newUserAccessFinance bool
+var newUserAccessTime bool
+
 // AddUserCmd represents the AddUser command
 var AddUserCmd = &cobra.Command{
 	Use:   "AddUser",
@@ -23,59 +28,61 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if newUserUsername == "" {
+			fmt.Println("-u or --username flag not set. Please set this flag.")
+			return
+		}
+		if newUserPassword == "" {
+			fmt.Println("-p or --newPassword flag not set. Please set this flag.")
+			return
+		}
+
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err:\n%s\n", err)
+			return
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err:\n%s\n", err)
 			return
 		}
 		if permissions.Administrator != true {
 			fmt.Println("Current user is not an administrator")
 			return
 		}
-		newUserName, err := cmd.Flags().GetString("username")
-		if err != nil {
-			fmt.Println("username flag error")
-			return
-		}
-		_, err = queries.GetUserPermissions(context.Background(), newUserName)
+
+		_, err = queries.GetUserPermissions(context.Background(), newUserUsername)
 		if err == nil {
 			fmt.Println("Username already exists. Please use another user name or delete old user")
 			return
 		}
-		newPassword, err := cmd.Flags().GetString("newPassword")
+
+		hashedPasword, err := utils.Hashpassword(newUserPassword)
 		if err != nil {
-			fmt.Println("Password flag error")
-			return
-		}
-		hashedPasword, err := utils.Hashpassword(newPassword)
-		if err != nil {
-			fmt.Println("Error during pasword hash")
+			fmt.Printf("\nError during pasword hash. Err:\n%s\n", err)
 			return
 		}
 		finance, err := cmd.Flags().GetBool("AccessFinance")
 		if err != nil {
-			fmt.Println("Error during finance flag retrieval")
+			fmt.Printf("\nError during finance flag retrieval. Err:\n%s\n", err)
 			return
 		}
 		time, err := cmd.Flags().GetBool("AccessTime")
 		if err != nil {
-			fmt.Println("Error during time flag retrieval")
+			fmt.Printf("\nError during time flag retrieval. Err:\n%s\n", err)
 			return
 		}
 		newUser := database.AddUserParams{
-			Name:                   newUserName,
+			Name:                   newUserUsername,
 			HashedPassword:         hashedPasword,
 			AccessFinance:          finance,
 			AccessTimeregistration: time,
 		}
 		createdUser, err := queries.AddUser(context.Background(), newUser)
 		if err != nil {
-			fmt.Println("Error duing user creation")
+			fmt.Printf("\nError duing user creation. Err:\n%s\n", err)
 			return
 		}
 		fmt.Printf("New user created. ID: %s, Name: %s, Financial access: %t, Time access: %t. Please update password ASAP.", createdUser.ID,
@@ -87,33 +94,15 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(AddUserCmd)
-	AddUserCmd.Flags().StringP("username", "u", "", "New username. (required)")
-	err := AddUserCmd.MarkFlagRequired("username")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
-	AddUserCmd.Flags().StringP("newPassword", "n", "", "New password. (required)")
-	err = AddUserCmd.MarkFlagRequired("newPassword")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	AddUserCmd.Flags().StringVarP(&newUserUsername, "username", "u", "", "New username. (required)")
 
-	AddUserCmd.Flags().BoolP("AccessFinance", "f", false, "Access to the financial database use true or false")
-	err = AddUserCmd.MarkFlagRequired("AccessFinance")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	AddUserCmd.Flags().StringVarP(&newUserPassword, "newPassword", "p", "", "New password. (required)")
 
-	AddUserCmd.Flags().BoolP("AccessTime", "t", false, "Access to the Time database use true or false")
-	err = AddUserCmd.MarkFlagRequired("AccessTime")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	AddUserCmd.Flags().BoolVarP(&newUserAccessFinance, "AccessFinance", "f", false, "Access to the financial database use true or false")
+
+	AddUserCmd.Flags().BoolVarP(&newUserAccessTime, "AccessTime", "t", false, "Access to the Time database use true or false")
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

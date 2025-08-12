@@ -21,15 +21,24 @@ var overviewByCategoryCmd = &cobra.Command{
 	Long: `This command returns all entries of a spcific database that is registered under a specifc catagory.
 	This comand requires two flags. One to specify the database to querry and one to specify the catagory being looked for.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if overviewByCategoryCategory == "" {
+			fmt.Printf("\n-c --category flag not set. Please set this flag\n")
+			return
+		}
+		if overviewByCategoryType == "" {
+			fmt.Printf("\n-t --type flag not set. Please set this flag\n")
+			return
+		}
+
 		layout := "02-01-2006"
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err:\n%s\n", err)
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err:\n%s\n", err)
 			return
 		}
 		switch overviewByCategoryType {
@@ -40,7 +49,7 @@ var overviewByCategoryCmd = &cobra.Command{
 			}
 			entries, err := queries.OverviewTransactionByCatagory(context.Background(), overviewByCategoryCategory)
 			if err != nil {
-				fmt.Printf("error during fetching of data: %s \n", err)
+				fmt.Printf("\nerror during fetching of data: %s \n", err)
 				return
 			}
 			fmt.Printf("Overview of the Financial database of the catagroy %s\n", overviewByCategoryCategory)
@@ -55,7 +64,7 @@ var overviewByCategoryCmd = &cobra.Command{
 			}
 			entries, err := queries.OverviewTimeByCatagory(context.Background(), overviewByCategoryCategory)
 			if err != nil {
-				fmt.Printf("error during fetching of data: %s \n", err)
+				fmt.Printf("\nerror during fetching of data: %s \n", err)
 				return
 			}
 			fmt.Printf("Overview of the Time database of the catagroy %s\n", overviewByCategoryCategory)
@@ -74,18 +83,9 @@ func init() {
 	rootCmd.AddCommand(overviewByCategoryCmd)
 
 	overviewByCategoryCmd.Flags().StringVarP(&overviewByCategoryCategory, "category", "c", "", "A flag to specify the category you aare looking for")
-	err := overviewByCategoryCmd.MarkFlagRequired("category")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
 
 	overviewByCategoryCmd.Flags().StringVarP(&overviewByCategoryType, "type", "t", "", "A flag to specify the database you want to querry. Use Financial, Time or all after the flag")
-	err = overviewByCategoryCmd.MarkFlagRequired("type")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

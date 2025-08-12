@@ -12,6 +12,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var addadminUsername string
+var addadminPassword string
+
 // AddAdminCmd represents the AddAdmin command
 var AddAdminCmd = &cobra.Command{
 	Use:   "AddAdmin",
@@ -29,66 +32,49 @@ var AddAdminCmd = &cobra.Command{
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
-			fmt.Println("Error retrieving current user from session")
+			fmt.Printf("\nError retrieving current user from session. Err: \n%s\n", err)
 		}
 		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
 		if err != nil {
-			fmt.Println("Error during retrieval of user permissions from database")
+			fmt.Printf("\nError during retrieval of user permissions from database. Err: \n%s\n", err)
 			return
 		}
 		if permissions.Administrator != true {
 			fmt.Println("Current user is not an administrator")
 			return
 		}
-		newUserName, err := cmd.Flags().GetString("username")
-		if err != nil {
-			fmt.Println("username flag error")
-			return
-		}
-		_, err = queries.GetUserPermissions(context.Background(), newUserName)
+		_, err = queries.GetUserPermissions(context.Background(), addadminUsername)
 		if err == nil {
-			fmt.Println("Username already exists. Please use another user name or delete old user")
+
+			fmt.Printf("\n User already exists. Please use a diferent username\n")
 			return
 		}
-		newPassword, err := cmd.Flags().GetString("newPassword")
+
+		hashedPasword, err := utils.Hashpassword(addadminPassword)
 		if err != nil {
-			fmt.Println("Password flag error")
-			return
-		}
-		hashedPasword, err := utils.Hashpassword(newPassword)
-		if err != nil {
-			fmt.Println("Error during pasword hash")
+			fmt.Printf("\nError during pasword hash. Err: \n%s\n", err)
 			return
 		}
 		newAdmin := database.AddAdminParams{
-			Name:           newUserName,
+			Name:           addadminUsername,
 			HashedPassword: hashedPasword,
 		}
 		created, err := queries.AddAdmin(context.Background(), newAdmin)
 		if err != nil {
-			fmt.Println("Error creating a new user")
+			fmt.Printf("\nError creating a new user. Err: \n%s\n", err)
 			return
 		}
-		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes their password ASAP!", created.ID, created.Name)
+		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes their password ASAP!\n", created.ID, created.Name)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(AddAdminCmd)
 
-	AddAdminCmd.Flags().StringP("username", "u", "", "New username. (required)")
-	err := AddAdminCmd.MarkFlagRequired("username")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	AddAdminCmd.Flags().StringVarP(&addadminUsername, "username", "u", "", "New username. (required)")
 
-	AddAdminCmd.Flags().StringP("newPassword", "n", "", "New password. (required)")
-	err = AddAdminCmd.MarkFlagRequired("newPassword")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	AddAdminCmd.Flags().StringVarP(&addadminPassword, "newPassword", "n", "", "New password. (required)")
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

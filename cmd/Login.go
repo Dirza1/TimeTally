@@ -13,6 +13,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var loginUsername string
+var loginPassword string
+
 // LoginCmd represents the Login command
 var LoginCmd = &cobra.Command{
 	Use:   "Login",
@@ -20,23 +23,22 @@ var LoginCmd = &cobra.Command{
 	Long: `This command will create a session with the suppyed user.
 	This session is used to check permissions when executing commands`,
 	Run: func(cmd *cobra.Command, args []string) {
-		userName, err := cmd.Flags().GetString("username")
-		if err != nil {
-			fmt.Println("Username flag error")
+		if loginUsername == "" {
+			fmt.Println("-u or --username flag not set. Please set this flag")
 			return
 		}
-		password, err := cmd.Flags().GetString("password")
-		if err != nil {
-			fmt.Println("Password flag error")
+		if loginPassword == "" {
+			fmt.Println("-p or --password flag not set. Please set this flag")
 			return
 		}
+
 		queries := utils.DatabaseConnection()
-		user, err := queries.Login(context.Background(), userName)
+		user, err := queries.Login(context.Background(), loginUsername)
 		if err != nil {
-			fmt.Println("Error during retrieval of user from database")
+			fmt.Printf("\nError during retrieval of user from database. Err:\n%s\n", err)
 			return
 		}
-		if !utils.CompairPaswordHash(password, user.HashedPassword) {
+		if !utils.CompairPaswordHash(loginPassword, user.HashedPassword) {
 			fmt.Println("Incorrect password supplied")
 			return
 		}
@@ -56,19 +58,9 @@ var LoginCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(LoginCmd)
 
-	LoginCmd.Flags().StringP("username", "u", "", "New username. (required)")
-	err := LoginCmd.MarkFlagRequired("username")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	LoginCmd.Flags().StringVarP(&loginUsername, "username", "u", "", "New username. (required)")
 
-	LoginCmd.Flags().StringP("password", "p", "", "password. (required)")
-	err = LoginCmd.MarkFlagRequired("password")
-	if err != nil {
-		fmt.Printf("required flag not set")
-		return
-	}
+	LoginCmd.Flags().StringVarP(&loginPassword, "password", "p", "", "password. (required)")
 
 	// Here you will define your flags and configuration settings.
 
