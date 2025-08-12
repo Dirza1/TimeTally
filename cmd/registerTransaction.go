@@ -1,5 +1,5 @@
 /*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+Copyright © 2025 Jasper Olthof-Donker <jasper.olthof@xs4all.nl>
 */
 package cmd
 
