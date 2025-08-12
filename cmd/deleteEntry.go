@@ -56,6 +56,7 @@ var deleteEntryCmd = &cobra.Command{
 				return
 			}
 			fmt.Println("Entry deleted")
+			utils.UpdateSession()
 		case "Time":
 			err := queries.DeleteTime(context.Background(), ID)
 			if err != nil {
@@ -63,6 +64,7 @@ var deleteEntryCmd = &cobra.Command{
 				return
 			}
 			fmt.Println("Entry deleted")
+			utils.UpdateSession()
 		default:
 			fmt.Println("Incorrect use of the -t/ --Time flag. Use Finance or Time after the flag. Be mindfull of capitalisation.")
 		}

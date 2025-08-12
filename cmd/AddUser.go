@@ -89,6 +89,7 @@ to quickly create a Cobra application.`,
 			createdUser.Name,
 			createdUser.AccessFinance,
 			createdUser.AccessTimeregistration)
+		utils.UpdateSession()
 	},
 }
 

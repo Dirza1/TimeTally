@@ -65,6 +65,7 @@ var overviewDatesCmd = &cobra.Command{
 			}
 			fmt.Println("Overview op financial databse:")
 			fmt.Println(queries.OverviewTransactionsDate(context.Background(), money))
+			utils.UpdateSession()
 		case "Time":
 			if permissions.AccessTimeregistration != true {
 				fmt.Println("Current user is not allowed in the time registration databse")
@@ -76,6 +77,7 @@ var overviewDatesCmd = &cobra.Command{
 			}
 			fmt.Println("Overview op timeregistration databse:")
 			fmt.Println(queries.OverviewTimeDates(context.Background(), time))
+			utils.UpdateSession()
 		case "All":
 			if permissions.AccessTimeregistration != true || permissions.AccessFinance != true {
 				fmt.Println("Current user is missing either time or financial access.")
@@ -93,6 +95,7 @@ var overviewDatesCmd = &cobra.Command{
 			}
 			fmt.Println("Overview op timeregistration databse:")
 			fmt.Println(queries.OverviewTimeDates(context.Background(), time))
+			utils.UpdateSession()
 		default:
 			fmt.Println("Incorrect use of the type flag. Use Finance, Time or All. Pay mind to the capitalation.")
 		}

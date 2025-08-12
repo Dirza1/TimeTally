@@ -83,6 +83,7 @@ var updateTimeCmd = &cobra.Command{
 		fmt.Println("Time updated to: ")
 		fmt.Printf("\nEntry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %d \n",
 			entry.ID, entry.DateActivity.Format(layout), entry.Catagory, entry.Description, entry.LengthMinutes)
+		utils.UpdateSession()
 	},
 }
 

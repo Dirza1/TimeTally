@@ -92,6 +92,7 @@ var updateTransactionCmd = &cobra.Command{
 		fmt.Println("Transaction updated to: ")
 		fmt.Printf("\nEntry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Cent): %d \n",
 			transactions.ID, transactions.DateTransaction.Format(layout), transactions.Catagory, transactions.Description, transactions.AmmountCent)
+		utils.UpdateSession()
 	},
 }
 

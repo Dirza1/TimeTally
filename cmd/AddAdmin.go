@@ -65,6 +65,7 @@ var AddAdminCmd = &cobra.Command{
 			return
 		}
 		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes their password ASAP!\n", created.ID, created.Name)
+		utils.UpdateSession()
 	},
 }
 

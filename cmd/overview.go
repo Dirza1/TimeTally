@@ -54,7 +54,7 @@ var overviewCmd = &cobra.Command{
 				fmt.Printf("Entry ID: %s. Transaction date: %s. Category: %s, Description: %s, Total ammount(Euro): %.2f \n",
 					entry.ID, entry.DateTransaction.Format(layout), entry.Catagory, entry.Description, entry.Amount)
 			}
-
+			utils.UpdateSession()
 		case "Time":
 			if permissions.AccessTimeregistration != true {
 				fmt.Println("Current user is not allowed in the time registration databse")
@@ -70,7 +70,7 @@ var overviewCmd = &cobra.Command{
 				fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %.2f \n",
 					entry.ID, entry.DateActivity.Format(layout), entry.Catagory, entry.Description, entry.TimeHours)
 			}
-
+			utils.UpdateSession()
 		default:
 			fmt.Println("Incorrect use of the -t/ --Type flag. Use Finance or Time after the flag. Be mindfull of capitalisation.")
 		}

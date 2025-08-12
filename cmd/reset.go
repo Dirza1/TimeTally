@@ -89,6 +89,7 @@ var resetCmd = &cobra.Command{
 				return
 			}
 			fmt.Println("reset called on finance")
+			utils.UpdateSession()
 		case "Time":
 			err := queries.ResetTimeRegistration(context.Background())
 			if err != nil {
@@ -96,6 +97,7 @@ var resetCmd = &cobra.Command{
 				return
 			}
 			fmt.Println("reset called on time")
+			utils.UpdateSession()
 		case "All":
 			err := queries.ResetTimeRegistration(context.Background())
 			if err != nil {
@@ -108,6 +110,7 @@ var resetCmd = &cobra.Command{
 				return
 			}
 			fmt.Println("reset called on all")
+			utils.UpdateSession()
 		default:
 			fmt.Println("Incorrect use of Type flag. Use either Finance, Time or All. Ensure correct capitalisation")
 		}

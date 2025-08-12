@@ -74,3 +74,21 @@ func LoadSession() (*Session, error) {
 	err = json.Unmarshal(data, &s)
 	return &s, err
 }
+
+func UpdateSession() {
+	session, err := LoadSession()
+	if err != nil {
+		fmt.Printf("\nError loading current session. Err:\n%s\n", err)
+		return
+	}
+	newSession := Session{
+		UserName: session.UserName,
+		UserID:   session.UserID,
+		LastUsed: time.Now(),
+	}
+	err = SaveSession(&newSession)
+	if err != nil {
+		fmt.Printf("\nError saving new session. Err:\n%s\n", err)
+		return
+	}
+}
