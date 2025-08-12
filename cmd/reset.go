@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
 	"github.com/joho/godotenv"
@@ -38,12 +39,20 @@ var resetCmd = &cobra.Command{
 		if resetPassword == "" {
 			fmt.Printf("\n-p or --pasword flag not set. Please provide the reset pasword\n")
 		}
+		session, err := utils.LoadSession()
+		if err != nil {
+			fmt.Printf("\nError loading session. Err:\n%s\n", err)
+		}
+		currentTime := time.Now()
+		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
+			fmt.Println("Users session expired. Please use the login command to continue using the system")
+		}
 
 		if resetConform != "true" {
 			fmt.Println("Confirm flag not set correctly")
 			return
 		}
-		err := godotenv.Load(".env")
+		err = godotenv.Load(".env")
 		if err != nil {
 			fmt.Printf("\nError loading enviromental variables. Err: \n%s\n", err)
 			return
@@ -110,7 +119,7 @@ var resetCmd = &cobra.Command{
 				return
 			}
 			fmt.Println("reset called on all")
-			utils.UpdateSession()
+
 		default:
 			fmt.Println("Incorrect use of Type flag. Use either Finance, Time or All. Ensure correct capitalisation")
 		}

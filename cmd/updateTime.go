@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -47,7 +48,14 @@ var updateTimeCmd = &cobra.Command{
 			fmt.Printf("\n-i or --id flag not set. Please supply a ID to update\n")
 			return
 		}
-
+		session, err := utils.LoadSession()
+		if err != nil {
+			fmt.Printf("\nError loading session. Err:\n%s\n", err)
+		}
+		currentTime := time.Now()
+		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
+			fmt.Println("Users session expired. Please use the login command to continue using the system")
+		}
 		layout := "02-01-2006"
 		ID, err := uuid.Parse(updateTimeID)
 		if err != nil {

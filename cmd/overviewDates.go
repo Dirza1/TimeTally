@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -34,6 +35,14 @@ var overviewDatesCmd = &cobra.Command{
 		if OverviewDatesSecondDate == "" {
 			fmt.Println("-s or --second-date flag not set. Please use this flag")
 			return
+		}
+		session, err := utils.LoadSession()
+		if err != nil {
+			fmt.Printf("\nError loading session. Err:\n%s\n", err)
+		}
+		currentTime := time.Now()
+		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
+			fmt.Println("Users session expired. Please use the login command to continue using the system")
 		}
 
 		firstDate := utils.TimeParse(OverviewDatesFirstDate)

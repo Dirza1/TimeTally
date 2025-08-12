@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -29,6 +30,23 @@ var AddAdminCmd = &cobra.Command{
 	- Generate overviews of both databases
 	- Create new users`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if addadminUsername == "" {
+			fmt.Println("-u or --username flag not set. Please set this flag")
+			return
+		}
+		if addadminPassword == "" {
+			fmt.Println("-p or --newPassword flag not set. Please set this flag")
+			return
+		}
+
+		session, err := utils.LoadSession()
+		if err != nil {
+			fmt.Printf("\nError loading session. Err:\n%s\n", err)
+		}
+		currentTime := time.Now()
+		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
+			fmt.Println("Users session expired. Please use the login command to continue using the system")
+		}
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
@@ -74,7 +92,7 @@ func init() {
 
 	AddAdminCmd.Flags().StringVarP(&addadminUsername, "username", "u", "", "New username. (required)")
 
-	AddAdminCmd.Flags().StringVarP(&addadminPassword, "newPassword", "n", "", "New password. (required)")
+	AddAdminCmd.Flags().StringVarP(&addadminPassword, "newPassword", "p", "", "New password. (required)")
 
 	// Here you will define your flags and configuration settings.
 

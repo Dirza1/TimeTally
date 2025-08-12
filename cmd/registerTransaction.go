@@ -6,6 +6,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Dirza1/Time-and-expence-registration/internal/database"
 	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
@@ -46,7 +47,14 @@ var registerTransactionCmd = &cobra.Command{
 			fmt.Printf("\n-c or --category flag not set. Ensure category is set for the transaction\n")
 			return
 		}
-
+		session, err := utils.LoadSession()
+		if err != nil {
+			fmt.Printf("\nError loading session. Err:\n%s\n", err)
+		}
+		currentTime := time.Now()
+		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
+			fmt.Println("Users session expired. Please use the login command to continue using the system")
+		}
 		queries := utils.DatabaseConnection()
 		currentUser, err := utils.LoadSession()
 		if err != nil {
