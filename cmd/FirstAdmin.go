@@ -59,7 +59,7 @@ var FirstAdminCmd = &cobra.Command{
 			fmt.Printf("\nError creating a new user:\n%s\n", err)
 			return
 		}
-		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes their password ASAP!", created.ID, created.Name)
+		fmt.Printf("\n New Administrator created. ID: %s, Name: %s. Ensure admin changes their password ASAP!\n", created.ID, created.Name)
 	},
 }
 
