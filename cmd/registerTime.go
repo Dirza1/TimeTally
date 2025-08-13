@@ -80,7 +80,7 @@ var registerTimeCmd = &cobra.Command{
 		}
 		layout := "02-01-2006"
 		fmt.Printf("Databse entry created!\n")
-		fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(Hours): %d \n",
+		fmt.Printf("Entry ID: %s. Activity date: %s. Category: %s, Description: %s, Time spent(minutes): %d \n",
 			entry.ID, entry.DateActivity.Format(layout), entry.Catagory, entry.Description, entry.LengthMinutes)
 		utils.UpdateSession()
 
