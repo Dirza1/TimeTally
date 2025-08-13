@@ -142,3 +142,26 @@ It will show you a list of all available commands.
 ## Closure words
 I hope you will find this program usefull.
 Should you find any bugs, have any sugestions please let me know via: jasper.olthof@xs4all.nl
+
+## Contributing
+If you would like to Contribute to the program please create a fork andd make a pull request to the main brannch.
+New functions should contain tests or have a clear explanation on why tests are not used.
+
+### Clone the repo
+
+```bash
+git clone https://github.com/Dirza1/TimeTally
+cd TimeTally
+```
+
+### Build the project
+
+```bash
+go build
+```
+
+Run the project and make the improvements.
+Generate Tests and then make you pull request.
+
+note: Your improvemennts may not be merged base on the creators ideas.
+If you want to make sure your imporvements will be added, conntact the creator prior to starting.
