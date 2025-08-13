@@ -70,6 +70,13 @@ YourSecretPassword -> A password you want to use to reset your databases
 
 Save the .env file in the same folder you have the program itself.
 
+### Linux: Set the program in your PATH:
+If you work on a linux machine you need to set the program in your path.
+use:
+```bash
+sudo mv TimeTally /usr/local/bin/
+```
+
 ### Initialize your database
 Now that we have your database running, we can get it ready to work.
 We need to initialize (also called migrate).
@@ -144,7 +151,7 @@ I hope you will find this program usefull.
 Should you find any bugs, have any sugestions please let me know via: jasper.olthof@xs4all.nl
 
 ## Contributing
-If you would like to Contribute to the program please create a fork andd make a pull request to the main brannch.
+If you would like to contribute to the program please create a fork and make a pull request to the main branch.
 New functions should contain tests or have a clear explanation on why tests are not used.
 
 ### Clone the repo
@@ -163,5 +170,5 @@ go build
 Run the project and make the improvements.
 Generate Tests and then make you pull request.
 
-note: Your improvemennts may not be merged base on the creators ideas.
-If you want to make sure your imporvements will be added, conntact the creator prior to starting.
+note: Your improvements may not be merged base on the creators ideas.
+If you want to make sure your improvements will be added, contact the creator prior to starting.
