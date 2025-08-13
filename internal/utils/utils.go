@@ -37,6 +37,21 @@ func DatabaseConnection() database.Queries {
 	return *queries
 }
 
+func Database() *sql.DB {
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Printf("Error loading enviromental variables")
+		return nil
+	}
+
+	dbURL := os.Getenv("DB_URL")
+	dbConn, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal("Datbase error:", err)
+	}
+	return dbConn
+}
+
 func TimeParse(toParseDate string) time.Time {
 	layout := "02-01-2006"
 	Date, err := time.Parse(layout, toParseDate)
