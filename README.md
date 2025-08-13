@@ -70,6 +70,26 @@ YourSecretPassword -> A password you want to use to reset your databases
 
 Save the .env file in the same folder you have the program itself.
 
+#### secure your .ENV file
+It is highly recomended to secure your .env file for anyone that is not you (on shared PC's).
+You can do this in the following way:
+
+##### Windows
+- Rightclick on the file.
+- Click Properties
+- Navigate to Security
+- Click on advanced.
+
+remove all groups that is not you.
+
+#### Linux
+
+Navigate to the file location.
+Type:
+```bash
+chmod 600 .env
+```
+
 ### Linux: Set the program in your PATH:
 If you work on a linux machine you need to set the program in your path.
 use:
