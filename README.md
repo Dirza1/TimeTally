@@ -22,7 +22,7 @@ This part of the guild will explain how to get started.
 ### Instal and initialise PostgreSQL
 First we need to instal a PostgreSQL database.
 This is a widly used localy run database that is open source.
-Documentation on this databse can be found here: [link](https://www.postgresql.org/)
+Documentation on this databse can be found here: [Postgresql.org](https://www.postgresql.org/)
 
 ### Set up your .env file
 
