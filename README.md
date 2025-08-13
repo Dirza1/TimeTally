@@ -19,12 +19,126 @@ Here's what makes TimeTally different:
 
 This part of the guild will explain how to get started.
 
-### Instal and initialise PostgreSQL
-First we need to instal a PostgreSQL database.
-This is a widly used localy run database that is open source.
-Documentation on this databse can be found here: [Postgresql.org](https://www.postgresql.org/)
+### Install and initialize PostgreSQL
+First we need to install a PostgreSQL database.
+This is a widely used locally run database that is open source.
+Documentation on this database can be found here: [Postgresql.org](https://www.postgresql.org/)
+The easiest installation can be found here: [Install postgreSQL](https://www.w3schools.com/postgresql/postgresql_install.php)
+Note the following: You need to ensure you have the following data saved:
+-Your password
+-The port you will use
+-The username you select
+
+Complete the instructions in the "install" and "Get Started"sections of the website.
+You should continue until you have the screen which says: postgres=#
+Then you have PostgreSQL installed.
+
+To finish the installation in the SQL Shell type this:
+"CREATE DATABASE your_database_name;" replace your_database_name with what you want your database called, and don’t forget the semicolon at the end.
+Mine is called "Accounting".
+
+At the end of this installation you should have noted down:
+-Your password
+-The port you will use
+-The username you select
+-Your database name
+
+We need this information to set up the .env file in the next section.
 
 ### Set up your .env file
+Now that we have PostgreSQL installed we need a way for our program to connect to it.
+That is what the .env file is for.
+
+WARNING:
+The .env file will contain two important things:
+1. Your database connection string that you can use to connect to the database, but other people can use it as well on your PC.
+2. Your secret password used for resetting a database.
+Ensure that unauthorized people cannot access your .env file!
+
+The program should have been supplied with a .env.example file. You can remove the .example from the name.
+Otherwise you need to make a new file ending in .env with the following content:
+DB_URL="postgres://user:password@localhost:5432/mydb?sslmode=disable"
+MANUAL_CONNECTION=" psql postgres://user:password@localhost:5432/mydb?sslmode=disable"
+reset_password="YourSecretPassWord"
+
+Change the following:
+user -> your username
+password -> your password
+5432 -> the port you chose for the database
+mydb -> your database name
+YourSecretPassword -> A password you want to use to reset your databases
+
+Save the .env file in the same folder you have the program itself.
+
+### Initialize your database
+Now that we have your database running, we can get it ready to work.
+We need to initialize (also called migrate).
+The program can do this for you.
+
+#### Windows
+Press windows + r, type CMD and press enter.
+You are now in your command line. 
+
+#### General
+Navigate to the folder your program is saved in.
+Then type: **TimeTally migrate**
+Your should then see a message stating "migration completed"
+This shows that the database is ready to go.
+Otherwise the error message should give you information on how too solve it.
+Double check the data in your .env file. Likely the issue is there
 
 ### Create your first administrator account
+To get started you need your first account.
+The program allows you to make a administrator account if none are available.
+In your command line when you are in the filter the program is located type:
+**TimeTally FirstAdmin -u username -p password**
 
+The system then makes a username with the username and password.
+You are now ready to start using the program!
+
+## Using the program   
+Using a CLI tool is verry easy.
+We use the terminal or Command Line Interface the same we did for generating the first admin and database migration.
+We use the terminal and navigate to the folder that contains the program.
+(note to make it easy you can put the program in the folder that you start your terminal in)
+
+When you are there you always work with the program like this:
+
+**TimeTally [command] -[flag] [argument]**
+
+So you always start with TimeTally, then the command you want to use.
+You then put the required flags in place and the argument that is supposed to go with that flag.
+You can find the flags with a command by typing this:
+
+**TimeTally [command] -h**
+
+That will give you a help section on the selected command.
+
+## Commands
+The folowing commands are avalible:
+* AddAdmin
+* AddUser
+* deleteEntry
+* DeleteUser
+* FirstAdmin
+* Login
+* Logout
+* migrate
+* overview
+* overviewByCategory
+* overviewDates
+* registerTime
+* register Transaction
+* reset
+* updateTime
+* updateTransaction
+* UpdateUser
+* UserOverview
+
+You can also generate an overview of the available commands by typing:
+**TimeTally -h**
+It will show you a list of all available commands.
+
+## Closure words
+I hope you will find this program usefull.
+Should you find any bugs, have any sugestions please let me know via: jasper.olthof@xs4all.nl
