@@ -35,12 +35,14 @@ func TestMain(m *testing.M) {
 	rootCmd.SetArgs(Args[1:])
 	rootCmd.Execute()
 
+	// setting up the database connection
+	querry = utils.DatabaseConnection()
+
 	//Starting the tests
 	exitCode := m.Run()
 
 	fmt.Println("Ending tests and resetting database")
 	//Cleaning up both databases
-	querry = utils.DatabaseConnection()
 	_ = querry.ResetTransaction(context.Background())
 	_ = querry.ResetTimeRegistration(context.Background())
 
@@ -119,6 +121,7 @@ func TestReset(t *testing.T) {
 				fmt.Println("Test failed, finance database not empty")
 				t.Fail()
 			}
+
 		})
 
 	}

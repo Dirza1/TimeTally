@@ -44,6 +44,11 @@ var resetCmd = &cobra.Command{
 			fmt.Printf("\nError loading session. Err:\n%s\n", err)
 			return
 		}
+		if session == nil {
+			fmt.Println("Returned session is nil.")
+			return
+
+		}
 		currentTime := time.Now()
 		if currentTime.Sub(session.LastUsed) > 15*time.Minute {
 			fmt.Println("Users session expired. Please use the login command to continue using the system")
@@ -59,24 +64,14 @@ var resetCmd = &cobra.Command{
 			fmt.Printf("\nError loading enviromental variables. Err: \n%s\n", err)
 			return
 		}
-		password, err := cmd.Flags().GetString("password")
-		if err != nil {
-			fmt.Printf("\nPassword flag error. Err: \n%s\n", err)
-			return
-		}
 		setPasword := os.Getenv("reset_password")
-		if setPasword != password {
+		if setPasword != resetPassword {
 			fmt.Println("Incorrect password supplied")
 			return
 		}
 		queries := utils.DatabaseConnection()
 
-		currentUser, err := utils.LoadSession()
-		if err != nil {
-			fmt.Printf("\nError retrieving current user from session. Err: \n%s\n", err)
-			return
-		}
-		permissions, err := queries.GetUserPermissions(context.Background(), currentUser.UserName)
+		permissions, err := queries.GetUserPermissions(context.Background(), session.UserName)
 		if err != nil {
 			fmt.Printf("\nError during retrieval of user permissions from database. Err: \n%s\n", err)
 			return
