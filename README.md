@@ -135,6 +135,8 @@ When you are there you always work with the program like this:
 
 So you always start with TimeTally, then the command you want to use.
 You then put the required flags in place and the argument that is supposed to go with that flag.
+**Note** if your argument contains a space, e.g. Sale of item, you need to enclose it in quotes.
+So Sale of item becomes "Sale of item". This is only required if there is a space.
 You can find the flags with a command by typing this:
 
 **TimeTally [command] -h**

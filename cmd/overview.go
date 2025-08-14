@@ -91,7 +91,7 @@ var overviewCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(overviewCmd)
 
-	overviewCmd.Flags().StringVarP(&OverviewType, "type", "t", "", "A flag to diferatiate between the databases. Use either Financial or Time after the flag")
+	overviewCmd.Flags().StringVarP(&OverviewType, "type", "t", "", "A flag to diferatiate between the databases. Use either Finance or Time after the flag")
 
 	// Here you will define your flags and configuration settings.
 
