@@ -6,7 +6,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
+	"github.com/Dirza1/TimeTally/internal/utils"
 	"github.com/pressly/goose"
 	"github.com/spf13/cobra"
 )

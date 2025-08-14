@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Dirza1/Time-and-expence-registration/internal/database"
-	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
+	"github.com/Dirza1/TimeTally/internal/database"
+	"github.com/Dirza1/TimeTally/internal/utils"
 	"github.com/spf13/cobra"
 )
 

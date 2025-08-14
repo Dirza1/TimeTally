@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
+	"github.com/Dirza1/TimeTally/internal/utils"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )

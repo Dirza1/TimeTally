@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/Dirza1/Time-and-expence-registration/internal/database"
-	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
+	"github.com/Dirza1/TimeTally/internal/database"
+	"github.com/Dirza1/TimeTally/internal/utils"
 )
 
 var querry database.Queries
@@ -24,11 +25,22 @@ type CLITest struct {
 
 func TestMain(m *testing.M) {
 	fmt.Println("Starting tests and database connection")
-	querry = utils.DatabaseConnection()
+	//Set up to root directory to ensure relative pathways are still correct
+	dir, _ := os.Getwd()
+	root := filepath.Join(dir, "..")
+	os.Chdir(root)
 
+	//loggin in into the database
+	Args := []string{"TimeTally", "Login", "-u", "Jasper", "-p", "Odin"}
+	rootCmd.SetArgs(Args[1:])
+	rootCmd.Execute()
+
+	//Starting the tests
 	exitCode := m.Run()
 
 	fmt.Println("Ending tests and resetting database")
+	//Cleaning up both databases
+	querry = utils.DatabaseConnection()
 	_ = querry.ResetTransaction(context.Background())
 	_ = querry.ResetTimeRegistration(context.Background())
 
@@ -40,32 +52,32 @@ func TestReset(t *testing.T) {
 	tests := []CLITest{
 		{
 			Name:       "Test reset of both databases",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All", "-p", "Odin2203!"},
+			Args:       []string{"TimeTally", "reset", "-c", "true", "-t", "All", "-p", "Odin2203!"},
 			WantOutput: "reset called on all\n",
 		},
 		{
 			Name:       "Test reset of Finance database",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "Finance", "-p", "Odin2203!"},
+			Args:       []string{"TimeTally", "reset", "-c", "true", "-t", "Finance", "-p", "Odin2203!"},
 			WantOutput: "reset called on finance\n",
 		},
 		{
 			Name:       "Test reset of Time database",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "Time", "-p", "Odin2203!"},
+			Args:       []string{"TimeTally", "reset", "-c", "true", "-t", "Time", "-p", "Odin2203!"},
 			WantOutput: "reset called on time\n",
 		},
 		{
 			Name:       "Wrong password supplied",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "All", "-p", "lol"},
+			Args:       []string{"TimeTally", "reset", "-c", "true", "-t", "All", "-p", "lol"},
 			WantOutput: "Incorrect password supplied\n",
 		},
 		{
 			Name:       "Confirm flag not set correctly",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "false", "-t", "All", "-p", "Odin2203!"},
+			Args:       []string{"TimeTally", "reset", "-c", "false", "-t", "All", "-p", "Odin2203!"},
 			WantOutput: "Confirm flag not set correctly\n",
 		},
 		{
 			Name:       "Incorrect type flag",
-			Args:       []string{"Time-and-expence-registration", "reset", "-c", "true", "-t", "all", "-p", "Odin2203!"},
+			Args:       []string{"TimeTally", "reset", "-c", "true", "-t", "all", "-p", "Odin2203!"},
 			WantOutput: "Incorrect use of Type flag. Use either Finance, Time or All. Ensure correct capitalisation\n",
 		},
 	}
@@ -116,7 +128,7 @@ func TestRegisterTime(t *testing.T) {
 	tests := []CLITest{
 		{
 			Name: "First time registration",
-			Args: []string{"Time-and-expence-registration", "registerTime",
+			Args: []string{"TimeTally", "registerTime",
 				"-d", "15-01-2025",
 				"-t", "30",
 				"-c", "honney harvest",
@@ -125,7 +137,7 @@ func TestRegisterTime(t *testing.T) {
 		},
 		{
 			Name: "Second time registration",
-			Args: []string{"Time-and-expence-registration", "registerTime",
+			Args: []string{"TimeTally", "registerTime",
 				"-d", "31-05-2024",
 				"-t", "30",
 				"-c", "maintenance",
@@ -168,7 +180,7 @@ func TestRegisterTransaction(t *testing.T) {
 	tests := []CLITest{
 		{
 			Name: "First transaction registration",
-			Args: []string{"Time-and-expence-registration", "registerTransaction",
+			Args: []string{"TimeTally", "registerTransaction",
 				"-d", "15-01-2025",
 				"-a", "300",
 				"-t", "spent",
@@ -178,7 +190,7 @@ func TestRegisterTransaction(t *testing.T) {
 		},
 		{
 			Name: "Second transaction registration",
-			Args: []string{"Time-and-expence-registration", "registerTransaction",
+			Args: []string{"TimeTally", "registerTransaction",
 				"-d", "16-02-2026",
 				"-a", "310",
 				"-t", "gained",
@@ -227,7 +239,7 @@ func TestOverview(t *testing.T) {
 	tests := []CLITest{
 		{
 			Name: "first transaction addition",
-			Args: []string{"Time-and-expence-registration", "registerTransaction",
+			Args: []string{"TimeTally", "registerTransaction",
 				"-d", "16-02-2026",
 				"-a", "300",
 				"-t", "spent",
@@ -238,7 +250,7 @@ func TestOverview(t *testing.T) {
 		},
 		{
 			Name: "First time registration",
-			Args: []string{"Time-and-expence-registration", "registerTime",
+			Args: []string{"TimeTally", "registerTime",
 				"-d", "15-01-2025",
 				"-t", "30",
 				"-c", "honney harvest",
@@ -248,28 +260,28 @@ func TestOverview(t *testing.T) {
 		},
 		{
 			Name: "First time overview",
-			Args: []string{"Time-and-expence-registration", "overview",
+			Args: []string{"TimeTally", "overview",
 				"-t", "Time"},
 			WantOutput: "15-01-2025. honney harvest, 4,5 hive#1,",
 			NotWanted:  "16-02-2026. 300, glass bottles, bought glass bottles,",
 		},
 		{
 			Name: "First finance overview",
-			Args: []string{"Time-and-expence-registration", "overview",
+			Args: []string{"TimeTally", "overview",
 				"-t", "Finance"},
 			WantOutput: "16-02-2026. 3.00 glass bottles, bought glass bottles,",
 			NotWanted:  "15-01-2025. honney harvest, 4,5 hive#1,",
 		},
 		{
 			Name: "Incorrect flag used",
-			Args: []string{"Time-and-expence-registration", "overview",
+			Args: []string{"TimeTally", "overview",
 				"-t", "Incorrect"},
 			WantOutput: "Incorrect use of the -t/ --Type flag. Use Finance or Time after the flag. Be mindfull of capitalisation.",
 			NotWanted:  "15-01-2025. honney harvest, 4,5 hive#1, 16-02-2026. 300, glass bottles, bought glass bottles,",
 		},
 		{
 			Name: "Second time registration",
-			Args: []string{"Time-and-expence-registration", "registerTime",
+			Args: []string{"TimeTally", "registerTime",
 				"-d", "25-11-3025",
 				"-t", "11",
 				"-c", "inspection",
@@ -279,7 +291,7 @@ func TestOverview(t *testing.T) {
 		},
 		{
 			Name: "second transaction addition",
-			Args: []string{"Time-and-expence-registration", "registerTransaction",
+			Args: []string{"TimeTally", "registerTransaction",
 				"-d", "29-07-2126",
 				"-a", "254",
 				"-t", "gained",
@@ -290,14 +302,14 @@ func TestOverview(t *testing.T) {
 		},
 		{
 			Name: "second finance overview",
-			Args: []string{"Time-and-expence-registration", "overview",
+			Args: []string{"TimeTally", "overview",
 				"-t", "Finance"},
 			WantOutput: "16-02-2026. 3.00 glass bottles, bought glass bottles, 29-07-2126. 2.54  sale, soled expertice,",
 			NotWanted:  "15-01-2025. honney harvest, 4,5 hive#1, 25-11-3025. inspection, inspected hive#2,",
 		},
 		{
 			Name: "second time overview",
-			Args: []string{"Time-and-expence-registration", "overview",
+			Args: []string{"TimeTally", "overview",
 				"-t", "Time"},
 			WantOutput: "15-01-2025. honney harvest, 4,5 hive#1, 25-11-3025. inspection, inspected hive#2,",
 			NotWanted:  "16-02-2026. 300, glass bottles, bought glass bottles, 29-07-2126. 2.54, sale, soled expertice,",

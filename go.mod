@@ -1,4 +1,4 @@
-module github.com/Dirza1/Time-and-expence-registration
+module github.com/Dirza1/TimeTally
 
 go 1.24.4
 

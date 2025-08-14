@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Dirza1/Time-and-expence-registration/internal/database"
+	"github.com/Dirza1/TimeTally/internal/database"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"

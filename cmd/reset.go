@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Dirza1/Time-and-expence-registration/internal/utils"
+	"github.com/Dirza1/TimeTally/internal/utils"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
