@@ -9,11 +9,10 @@ import (
 	"time"
 
 	"github.com/Dirza1/TimeTally/internal/utils"
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
 
-var toDeleteID string
+var toDeletename string
 
 // DeleteUserCmd represents the DeleteUser command
 var DeleteUserCmd = &cobra.Command{
@@ -23,7 +22,7 @@ var DeleteUserCmd = &cobra.Command{
 	This action can only be performed by an administrator.
 	Note this only removed a user from the user database. Entries in the Financial or Time database will still exist.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if toDeleteID == "" {
+		if toDeletename == "" {
 			fmt.Println("-i or --user-id flag not set. Provide the ID of the user to be deleted")
 			return
 		}
@@ -48,13 +47,8 @@ var DeleteUserCmd = &cobra.Command{
 			fmt.Println("Current user is not an administrator.")
 			return
 		}
-		ID, err := uuid.Parse(toDeleteID)
-		if err != nil {
-			fmt.Printf("\nerror during parsing of the ID: %s \n", err)
-			return
-		}
 
-		err = queries.DeleteUser(context.Background(), ID)
+		err = queries.DeleteUser(context.Background(), toDeletename)
 		if err != nil {
 			fmt.Printf("\nError during deletion of user. Err:\n%s\n", err)
 			return
@@ -67,7 +61,7 @@ var DeleteUserCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(DeleteUserCmd)
 
-	deleteEntryCmd.Flags().StringVarP(&toDeleteID, "user-id", "i", "", "The ID of the user to be deleted.")
+	deleteEntryCmd.Flags().StringVarP(&toDeletename, "name", "n", "", "The ID of the user to be deleted.")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

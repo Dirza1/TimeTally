@@ -361,3 +361,66 @@ func TestOverview(t *testing.T) {
 		})
 	}
 }
+
+func TestAddAdmin(t *testing.T) {
+	tests := []CLITest{
+		{
+			Name: "first Admin adding",
+			Args: []string{"TimeTally", "AddAdmin",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "New Administrator created.",
+			NotWanted:  "",
+		},
+		{
+			Name:       "logout",
+			Args:       []string{"TimeTally", "Logout"},
+			WantOutput: "User logged out",
+		},
+		{
+
+			Name: "second Admin adding while logged out",
+			Args: []string{"TimeTally", "AddAdmin",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "Error during retrieval of user permissions from database.",
+			NotWanted:  "",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			r, w, _ := os.Pipe()
+			originalStdout := os.Stdout
+
+			os.Stdout = w
+			rootCmd.SetArgs(test.Args[1:])
+			err := rootCmd.Execute()
+
+			w.Close()
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			os.Stdout = originalStdout
+			output := buf.String()
+			for _, word := range strings.Split(test.WantOutput, " ") {
+				if !strings.Contains(output, word) && err == nil {
+					fmt.Printf("Test failed. %s is not in %s", word, output)
+					t.Fail()
+				} else if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
+					t.Fail()
+				}
+			}
+			for _, word := range strings.Split(test.NotWanted, " ") {
+				if strings.Contains(output, word) && err == nil {
+					fmt.Printf("Test failed. %s should not be in %s", word, output)
+					t.Fail()
+				} else if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
+					t.Fail()
+				}
+			}
+		})
+	}
+}

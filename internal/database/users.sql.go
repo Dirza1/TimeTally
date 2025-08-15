@@ -149,11 +149,11 @@ func (q *Queries) CreateFirstAdministartor(ctx context.Context, arg CreateFirstA
 
 const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM users *
-WHERE id = $1
+WHERE name = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, id)
+func (q *Queries) DeleteUser(ctx context.Context, name string) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, name)
 	return err
 }
 
