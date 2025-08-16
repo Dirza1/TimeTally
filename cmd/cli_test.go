@@ -54,7 +54,7 @@ func TestMain(m *testing.M) {
 	_ = querry.ResetTransaction(context.Background())
 	_ = querry.ResetTimeRegistration(context.Background())
 
-	Args = []string{"TimeTally", "DeleteUser", "-n", "TestAdmin", "-p", "Test"}
+	Args = []string{"TimeTally", "DeleteUser", "-n", "TestAdmin"}
 	rootCmd.SetArgs(Args[1:])
 	rootCmd.Execute()
 
@@ -261,6 +261,8 @@ func TestRegisterTime(t *testing.T) {
 		fmt.Printf("Error during time database reset prior to test start: %s", err)
 	}
 	for _, test := range tests {
+		newUserAccessFinance = false
+		newUserAccessTime = false
 		t.Run(test.Name, func(t *testing.T) {
 			output, _ := runCLI(t, test.Args[1:])
 
@@ -695,6 +697,71 @@ func TestAddUser(t *testing.T) {
 		},
 	}
 
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			newUserAccessFinance = false
+			newUserAccessTime = false
+
+			output, err := runCLI(t, test.Args[1:])
+
+			for _, word := range strings.Split(test.WantOutput, " ") {
+				if !strings.Contains(output, word) && err == nil {
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, output)
+					t.Fail()
+				} else if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, err.Error())
+					t.Fail()
+				}
+			}
+			for _, word := range strings.Split(test.NotWanted, " ") {
+				if strings.Contains(output, word) && err == nil {
+					fmt.Printf("%s failed. %s should not be in %s", test.Name, word, output)
+					t.Fail()
+				} else if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, err.Error())
+					t.Fail()
+				}
+			}
+		})
+	}
+}
+
+func TestLoginandOut(t *testing.T) {
+	tests := []CLITest{
+		{
+			Name:       "logout",
+			Args:       []string{"TimeTally", "Logout"},
+			WantOutput: "User logged out",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Login wrong user name",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Tost-1",
+				"-p", "Test",
+			},
+			WantOutput: "No user found with supplied username",
+			NotWanted:  "Login Successful",
+		},
+		{
+			Name: "Login wrong password",
+			Args: []string{"TimeTally", "Login",
+				"-u", "TestAdmin",
+				"-p", "Tost",
+			},
+			WantOutput: "Incorrect password supplied",
+			NotWanted:  "Login Successful",
+		},
+		{
+			Name: "Login correct",
+			Args: []string{"TimeTally", "Login",
+				"-u", "TestAdmin",
+				"-p", "Test",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Incorrect supplied",
+		},
+	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			newUserAccessFinance = false

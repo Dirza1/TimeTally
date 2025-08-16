@@ -10,11 +10,13 @@ import (
 
 	"github.com/Dirza1/TimeTally/internal/database"
 	"github.com/Dirza1/TimeTally/internal/utils"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
 
 var updateUserUsername string
 var updateUserPassword string
+var updateUserID string
 var updateUserAccessFinance bool
 var updateUserAccessTime bool
 var updateUserAdministrator bool
@@ -37,6 +39,9 @@ var UpdateUserCmd = &cobra.Command{
 		if updateUserPassword == "" {
 			fmt.Println("-p or --newPassword flag not set. Please set this flag.")
 			return
+		}
+		if updateUserID == "" {
+			fmt.Println("-i or --id flag not set. Please set this flag.")
 		}
 		session, err := utils.LoadSession()
 		if err != nil {
@@ -70,7 +75,11 @@ var UpdateUserCmd = &cobra.Command{
 			fmt.Println("Username already exists. Please use another user name or delete old user")
 			return
 		}
-
+		ID, err := uuid.Parse(updateUserID)
+		if err != nil {
+			fmt.Printf("\nerror during parsing of the ID: %s \n", err)
+			return
+		}
 		hashedPasword, err := utils.Hashpassword(updateUserPassword)
 		if err != nil {
 			fmt.Printf("\nError during pasword hash. Err:\n%s\n", err)
@@ -82,6 +91,7 @@ var UpdateUserCmd = &cobra.Command{
 			AccessFinance:          updateUserAccessFinance,
 			AccessTimeregistration: updateUserAccessTime,
 			Administrator:          updateUserAdministrator,
+			ID:                     ID,
 		}
 		createdUser, err := queries.UpdateUser(context.Background(), newUser)
 		if err != nil {
@@ -109,6 +119,9 @@ func init() {
 	UpdateUserCmd.Flags().BoolVarP(&updateUserAccessTime, "AccessTime", "t", false, "Access to the Time database use true or false")
 
 	UpdateUserCmd.Flags().BoolVarP(&updateUserAdministrator, "administrator", "a", false, "Administrator rights for this person use true or false")
+
+	UpdateUserCmd.Flags().StringVarP(&updateUserID, "ID", "i", "", "The ID of the user that requires updating. It can be found using the UserOverview command")
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
