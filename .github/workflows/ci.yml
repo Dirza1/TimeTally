@@ -38,12 +38,11 @@ jobs:
       - name: Make CLI executable
         run: chmod +x ./timetally
 
+      - name: Set DB environment variable
+        run: echo "DB_URL=postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable" >> $GITHUB_ENV
+
       - name: Run DB migrations
-        env:
-          DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable
         run: ./timetally migrate
 
       - name: Run tests
-        env:
-          DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable
         run: go test ./...
