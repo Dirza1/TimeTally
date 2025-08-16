@@ -24,6 +24,10 @@ type CLITest struct {
 }
 
 func TestMain(m *testing.M) {
+	//Tests have to be performed with a fully empty database. No content or users should be in there.
+	//Please delete all users prior to starting the tests. After the tests re-create a first admin with FirstAdmin as it will be deleted by the tests
+	//User UserOverview to see if there are users in the databases prior to testing
+
 	fmt.Println("Starting tests and database connection")
 	//Set up to root directory to ensure relative pathways are still correct
 	dir, _ := os.Getwd()
@@ -31,7 +35,11 @@ func TestMain(m *testing.M) {
 	os.Chdir(root)
 
 	//loggin in into the database
-	Args := []string{"TimeTally", "Login", "-u", "Jasper", "-p", "Odin"}
+	Args := []string{"TimeTally", "FirstAdmin", "-u", "TestAdmin", "-p", "Test"}
+	rootCmd.SetArgs(Args[1:])
+	rootCmd.Execute()
+
+	Args = []string{"TimeTally", "Login", "-u", "TestAdmin", "-p", "Test"}
 	rootCmd.SetArgs(Args[1:])
 	rootCmd.Execute()
 
@@ -46,8 +54,29 @@ func TestMain(m *testing.M) {
 	_ = querry.ResetTransaction(context.Background())
 	_ = querry.ResetTimeRegistration(context.Background())
 
+	Args = []string{"TimeTally", "DeleteUser", "-n", "TestAdmin", "-p", "Test"}
+	rootCmd.SetArgs(Args[1:])
+	rootCmd.Execute()
+
 	os.Exit(exitCode)
 
+}
+
+func runCLI(t *testing.T, args []string) (string, error) {
+	t.Helper()
+	r, w, _ := os.Pipe()
+	originalStdout := os.Stdout
+	os.Stdout = w
+
+	rootCmd.SetArgs(args)
+	err := rootCmd.Execute()
+
+	w.Close()
+	var buf bytes.Buffer
+	_, _ = io.Copy(&buf, r)
+	os.Stdout = originalStdout
+
+	return buf.String(), err
 }
 
 func TestReset(t *testing.T) {
@@ -82,27 +111,60 @@ func TestReset(t *testing.T) {
 			Args:       []string{"TimeTally", "reset", "-c", "true", "-t", "all", "-p", "Odin2203!"},
 			WantOutput: "Incorrect use of Type flag. Use either Finance, Time or All. Ensure correct capitalisation\n",
 		},
+		{
+			Name: "First user adding",
+			Args: []string{"TimeTally", "AddUser",
+				"-u", "Test-1",
+				"-p", "Test-1",
+				"-t", "-f",
+			},
+			WantOutput: "New user created",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Test-1 login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name:       "Test reset no admin",
+			Args:       []string{"TimeTally", "reset", "-c", "true", "-t", "All", "-p", "Odin2203!"},
+			WantOutput: "Current user is not an administrator",
+		},
+		{
+			Name: "Test-1 login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "TestAdmin",
+				"-p", "Test",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "delete Test-1 ",
+			Args: []string{"TimeTally", "DeleteUser",
+				"-n", "Test-1",
+			},
+			WantOutput: "User deleted.",
+			NotWanted:  "Error",
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			r, w, _ := os.Pipe()
-			originalStdout := os.Stdout
 
-			os.Stdout = w
-			rootCmd.SetArgs(test.Args[1:])
-			rootCmd.Execute()
+			output, err := runCLI(t, test.Args[1:])
 
-			w.Close()
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			os.Stdout = originalStdout
-			output := buf.String()
+			for _, word := range strings.Split(test.WantOutput, " ") {
+				if !strings.Contains(output, word) {
+					fmt.Printf("\n%s failed: %s is not in %s", test.Name, word, output)
+					t.Fail()
+				}
 
-			if output != test.WantOutput {
-				fmt.Printf("%s failed:\n", test.Name)
-				fmt.Printf("output: %s expected output: %s\n", output, test.WantOutput)
-				t.Fail()
 			}
 			timeList, err := querry.OverviewAllTime(context.Background())
 			if err != nil {
@@ -147,6 +209,51 @@ func TestRegisterTime(t *testing.T) {
 				"-e", "weekly check on hive#2"},
 			WantOutput: "31-05-2024 maintenance  hive#2",
 		},
+		{
+			Name: "user adding",
+			Args: []string{"TimeTally", "AddUser",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "New user created",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Login second user",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Register Withouth privelages",
+			Args: []string{"TimeTally", "registerTime",
+				"-d", "31-05-2024",
+				"-t", "30",
+				"-c", "maintenance",
+				"-e", "weekly check on hive#2"},
+			WantOutput: "Current user is not allowed in the time registartion database",
+			NotWanted:  "Hive#2",
+		},
+		{
+			Name: "Admin login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "TestAdmin",
+				"-p", "Test",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "delete Test-1 ",
+			Args: []string{"TimeTally", "DeleteUser",
+				"-n", "Test-1",
+			},
+			WantOutput: "User deleted.",
+			NotWanted:  "Error",
+		},
 	}
 
 	err := querry.ResetTimeRegistration(context.Background())
@@ -155,22 +262,11 @@ func TestRegisterTime(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			r, w, _ := os.Pipe()
-			originalStdout := os.Stdout
+			output, _ := runCLI(t, test.Args[1:])
 
-			os.Stdout = w
-			rootCmd.SetArgs(test.Args[1:])
-			err = rootCmd.Execute()
-
-			w.Close()
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			os.Stdout = originalStdout
-			output := buf.String()
-			fmt.Printf("\n Output: %s", output)
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) {
-					fmt.Printf("\nTest failed: %s is not in %s", word, output)
+					fmt.Printf("\n%s failed: %s is not in %s", test.Name, word, output)
 					t.Fail()
 				}
 
@@ -209,18 +305,9 @@ func TestRegisterTransaction(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			r, w, _ := os.Pipe()
-			originalStdout := os.Stdout
 
-			os.Stdout = w
-			rootCmd.SetArgs(test.Args[1:])
-			err = rootCmd.Execute()
+			output, err := runCLI(t, test.Args[1:])
 
-			w.Close()
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			os.Stdout = originalStdout
-			output := buf.String()
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) && err == nil {
 					fmt.Printf("\nTest failed: %s is not in %s", word, output)
@@ -328,18 +415,9 @@ func TestOverview(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			r, w, _ := os.Pipe()
-			originalStdout := os.Stdout
 
-			os.Stdout = w
-			rootCmd.SetArgs(test.Args[1:])
-			err = rootCmd.Execute()
+			output, err := runCLI(t, test.Args[1:])
 
-			w.Close()
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			os.Stdout = originalStdout
-			output := buf.String()
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) && err == nil {
 					fmt.Printf("Test failed. %s is not in %s", word, output)
@@ -400,8 +478,8 @@ func TestAddAdmin(t *testing.T) {
 		{
 			Name: "Login admin user",
 			Args: []string{"TimeTally", "Login",
-				"-u", "Jasper",
-				"-p", "Odin",
+				"-u", "TestAdmin",
+				"-p", "Test",
 			},
 			WantOutput: "Login Successful",
 			NotWanted:  "Error",
@@ -438,8 +516,8 @@ func TestAddAdmin(t *testing.T) {
 		{
 			Name: "Login admin user",
 			Args: []string{"TimeTally", "Login",
-				"-u", "Jasper",
-				"-p", "Odin",
+				"-u", "TestAdmin",
+				"-p", "Test",
 			},
 			WantOutput: "Login Successful",
 			NotWanted:  "Error",
@@ -465,18 +543,9 @@ func TestAddAdmin(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			r, w, _ := os.Pipe()
-			originalStdout := os.Stdout
 
-			os.Stdout = w
-			rootCmd.SetArgs(test.Args[1:])
-			err := rootCmd.Execute()
+			output, err := runCLI(t, test.Args[1:])
 
-			w.Close()
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			os.Stdout = originalStdout
-			output := buf.String()
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) && err == nil {
 					fmt.Printf("%s failed. %s is not in %s", test.Name, word, output)
@@ -504,8 +573,8 @@ func TestAddUser(t *testing.T) {
 		{
 			Name: "Admin login",
 			Args: []string{"TimeTally", "Login",
-				"-u", "Jasper",
-				"-p", "Odin",
+				"-u", "TestAdmin",
+				"-p", "Test",
 			},
 			WantOutput: "Login Successful",
 			NotWanted:  "Error",
@@ -515,8 +584,7 @@ func TestAddUser(t *testing.T) {
 			Args: []string{"TimeTally", "AddUser",
 				"-u", "Test-1",
 				"-p", "Test-1",
-				"-t", "true",
-				"-f", "true",
+				"-t", "-f",
 			},
 			WantOutput: "New user created",
 			NotWanted:  "Error",
@@ -526,8 +594,7 @@ func TestAddUser(t *testing.T) {
 			Args: []string{"TimeTally", "AddUser",
 				"-u", "Test-2",
 				"-p", "Test-2",
-				"-t", "false",
-				"-f", "true",
+				"-f",
 			},
 			WantOutput: "New user created",
 			NotWanted:  "Error",
@@ -537,8 +604,7 @@ func TestAddUser(t *testing.T) {
 			Args: []string{"TimeTally", "AddUser",
 				"-u", "Test-3",
 				"-p", "Test-3",
-				"-t", "true",
-				"-f", "false",
+				"-t",
 			},
 			WantOutput: "New user created",
 			NotWanted:  "Error",
@@ -597,8 +663,8 @@ func TestAddUser(t *testing.T) {
 		{
 			Name: "Admin login",
 			Args: []string{"TimeTally", "Login",
-				"-u", "Jasper",
-				"-p", "Odin",
+				"-u", "TestAdmin",
+				"-p", "Test",
 			},
 			WantOutput: "Login Successful",
 			NotWanted:  "Error",
@@ -631,18 +697,11 @@ func TestAddUser(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			r, w, _ := os.Pipe()
-			originalStdout := os.Stdout
+			newUserAccessFinance = false
+			newUserAccessTime = false
 
-			os.Stdout = w
-			rootCmd.SetArgs(test.Args[1:])
-			err := rootCmd.Execute()
+			output, err := runCLI(t, test.Args[1:])
 
-			w.Close()
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			os.Stdout = originalStdout
-			output := buf.String()
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) && err == nil {
 					fmt.Printf("%s failed. %s is not in %s", test.Name, word, output)

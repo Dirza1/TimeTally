@@ -35,7 +35,7 @@ var LoginCmd = &cobra.Command{
 		queries := utils.DatabaseConnection()
 		user, err := queries.Login(context.Background(), loginUsername)
 		if err != nil {
-			fmt.Printf("\nError during retrieval of user from database. Err:\n%s\n", err)
+			fmt.Println("No user found with supplied username")
 			return
 		}
 		if !utils.CompairPaswordHash(loginPassword, user.HashedPassword) {
