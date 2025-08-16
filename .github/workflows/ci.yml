@@ -53,3 +53,6 @@ jobs:
 
       - name: Run tests
         run: go test ./...
+
+      - name: Clean up .env
+        run: rm -f .env
