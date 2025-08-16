@@ -371,12 +371,21 @@ func TestAddAdmin(t *testing.T) {
 				"-p", "Test-1",
 			},
 			WantOutput: "New Administrator created.",
-			NotWanted:  "",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "delete first Admin adding",
+			Args: []string{"TimeTally", "DeleteUser",
+				"-n", "Test-1",
+			},
+			WantOutput: "User deleted.",
+			NotWanted:  "Error",
 		},
 		{
 			Name:       "logout",
 			Args:       []string{"TimeTally", "Logout"},
 			WantOutput: "User logged out",
+			NotWanted:  "Error",
 		},
 		{
 
@@ -385,10 +394,75 @@ func TestAddAdmin(t *testing.T) {
 				"-u", "Test-1",
 				"-p", "Test-1",
 			},
-			WantOutput: "Error during retrieval of user permissions from database.",
-			NotWanted:  "",
+			WantOutput: "Users session expired. Please use the login command to continue using the system",
+			NotWanted:  "New Administrator created.",
+		},
+		{
+			Name: "Login admin user",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Jasper",
+				"-p", "Odin",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Add a non admin user",
+			Args: []string{"TimeTally", "AddUser",
+				"-u", "Test-1",
+				"-p", "Test-1",
+				"-f", "false",
+				"-t", "false",
+			},
+			WantOutput: "New user created.",
+			NotWanted:  "Administrator",
+		},
+		{
+			Name: "Login non admin user",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Add admin from non admin user",
+			Args: []string{"TimeTally", "AddAdmin",
+				"-u", "Test-2",
+				"-p", "Test-2",
+			},
+			WantOutput: "Current user is not an administrator",
+			NotWanted:  "Test-2",
+		},
+		{
+			Name: "Login admin user",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Jasper",
+				"-p", "Odin",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Add second user with same name",
+			Args: []string{"TimeTally", "AddAdmin",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "User already exists. Please use a diferent username",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "delete first Admin",
+			Args: []string{"TimeTally", "DeleteUser",
+				"-n", "Test-1",
+			},
+			WantOutput: "User deleted.",
+			NotWanted:  "Error",
 		},
 	}
+
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
 			r, w, _ := os.Pipe()
@@ -405,19 +479,19 @@ func TestAddAdmin(t *testing.T) {
 			output := buf.String()
 			for _, word := range strings.Split(test.WantOutput, " ") {
 				if !strings.Contains(output, word) && err == nil {
-					fmt.Printf("Test failed. %s is not in %s", word, output)
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, output)
 					t.Fail()
 				} else if err != nil && strings.Contains(err.Error(), word) {
-					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, err.Error())
 					t.Fail()
 				}
 			}
 			for _, word := range strings.Split(test.NotWanted, " ") {
 				if strings.Contains(output, word) && err == nil {
-					fmt.Printf("Test failed. %s should not be in %s", word, output)
+					fmt.Printf("%s failed. %s should not be in %s", test.Name, word, output)
 					t.Fail()
 				} else if err != nil && strings.Contains(err.Error(), word) {
-					fmt.Printf("Test failed. %s is not in %s", word, err.Error())
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, err.Error())
 					t.Fail()
 				}
 			}

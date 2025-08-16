@@ -51,7 +51,7 @@ VALUES(
     $2,
     $3,
     $4,
-    0
+    FALSE
 ) 
 RETURNING id, name, hashed_password, access_finance, access_timeregistration, administrator
 `

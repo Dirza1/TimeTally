@@ -61,7 +61,7 @@ var DeleteUserCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(DeleteUserCmd)
 
-	deleteEntryCmd.Flags().StringVarP(&toDeletename, "name", "n", "", "The ID of the user to be deleted.")
+	DeleteUserCmd.Flags().StringVarP(&toDeletename, "name", "n", "", "The ID of the user to be deleted.")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

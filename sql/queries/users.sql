@@ -18,7 +18,7 @@ VALUES(
     $2,
     $3,
     $4,
-    0
+    FALSE
 ) 
 RETURNING *;
 
