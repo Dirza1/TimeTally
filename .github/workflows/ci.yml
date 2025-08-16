@@ -35,6 +35,9 @@ jobs:
       - name: Build CLI
         run: go build -o timetally ./cmd
 
+      - name: Make CLI executable
+        run: chmod +x ./timetally
+
       - name: Run DB migrations
         env:
           DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable
