@@ -56,7 +56,7 @@ var AddUserCmd = &cobra.Command{
 			fmt.Printf("\nError during retrieval of user permissions from database. Err:\n%s\n", err)
 			return
 		}
-		if permissions.Administrator != true {
+		if permissions.Administrator == false {
 			fmt.Println("Current user is not an administrator")
 			return
 		}

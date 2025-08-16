@@ -498,3 +498,169 @@ func TestAddAdmin(t *testing.T) {
 		})
 	}
 }
+
+func TestAddUser(t *testing.T) {
+	tests := []CLITest{
+		{
+			Name: "Admin login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Jasper",
+				"-p", "Odin",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "First user adding",
+			Args: []string{"TimeTally", "AddUser",
+				"-u", "Test-1",
+				"-p", "Test-1",
+				"-t", "true",
+				"-f", "true",
+			},
+			WantOutput: "New user created",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Second user adding",
+			Args: []string{"TimeTally", "AddUser",
+				"-u", "Test-2",
+				"-p", "Test-2",
+				"-t", "false",
+				"-f", "true",
+			},
+			WantOutput: "New user created",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Third user adding",
+			Args: []string{"TimeTally", "AddUser",
+				"-u", "Test-3",
+				"-p", "Test-3",
+				"-t", "true",
+				"-f", "false",
+			},
+			WantOutput: "New user created",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Test-1 login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Test-1",
+				"-p", "Test-1",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Correct overview test",
+			Args: []string{"TimeTally", "overview",
+				"-t", "Time",
+			},
+			WantOutput: "Overview of the Timeregistrations:",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Test-2 login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Test-2",
+				"-p", "Test-2",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Incorrect overview test-2 test",
+			Args: []string{"TimeTally", "overview",
+				"-t", "Time",
+			},
+			WantOutput: "Current user is not allowed in the time registration databse",
+			NotWanted:  "Overview",
+		},
+		{
+			Name: "Test-3 login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Test-3",
+				"-p", "Test-3",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "Incorrect overview test-3 test",
+			Args: []string{"TimeTally", "overview",
+				"-t", "Finance",
+			},
+			WantOutput: "Current user is not allowed in the financial database",
+			NotWanted:  "Overview",
+		},
+		{
+			Name: "Admin login",
+			Args: []string{"TimeTally", "Login",
+				"-u", "Jasper",
+				"-p", "Odin",
+			},
+			WantOutput: "Login Successful",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "delete Test-1 ",
+			Args: []string{"TimeTally", "DeleteUser",
+				"-n", "Test-1",
+			},
+			WantOutput: "User deleted.",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "delete Test-2 ",
+			Args: []string{"TimeTally", "DeleteUser",
+				"-n", "Test-2",
+			},
+			WantOutput: "User deleted.",
+			NotWanted:  "Error",
+		},
+		{
+			Name: "delete Test-3 ",
+			Args: []string{"TimeTally", "DeleteUser",
+				"-n", "Test-3",
+			},
+			WantOutput: "User deleted.",
+			NotWanted:  "Error",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			r, w, _ := os.Pipe()
+			originalStdout := os.Stdout
+
+			os.Stdout = w
+			rootCmd.SetArgs(test.Args[1:])
+			err := rootCmd.Execute()
+
+			w.Close()
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			os.Stdout = originalStdout
+			output := buf.String()
+			for _, word := range strings.Split(test.WantOutput, " ") {
+				if !strings.Contains(output, word) && err == nil {
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, output)
+					t.Fail()
+				} else if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, err.Error())
+					t.Fail()
+				}
+			}
+			for _, word := range strings.Split(test.NotWanted, " ") {
+				if strings.Contains(output, word) && err == nil {
+					fmt.Printf("%s failed. %s should not be in %s", test.Name, word, output)
+					t.Fail()
+				} else if err != nil && strings.Contains(err.Error(), word) {
+					fmt.Printf("%s failed. %s is not in %s", test.Name, word, err.Error())
+					t.Fail()
+				}
+			}
+		})
+	}
+}

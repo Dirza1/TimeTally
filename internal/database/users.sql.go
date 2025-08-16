@@ -148,7 +148,7 @@ func (q *Queries) CreateFirstAdministartor(ctx context.Context, arg CreateFirstA
 }
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users *
+DELETE FROM users 
 WHERE name = $1
 `
 

@@ -5,7 +5,7 @@ CREATE TABLE users(
     hashed_password TEXT NOT NULL,
     access_finance BOOL NOT NULL,
     access_timeregistration BOOL NOT NULL,
-    administrator BOOL NOT NULL
+    administrator BOOL NOT NULL DEFAULT false
 );
 
 

@@ -32,13 +32,9 @@ var FirstAdminCmd = &cobra.Command{
 		}
 
 		queries := utils.DatabaseConnection()
-		administrators, err := queries.CheckOnAdministartor(context.Background())
-		if err != nil {
-			fmt.Printf("\nError fetching list of current administrators:\n %s\n", err)
-			return
-		}
-		if len(administrators) != 0 {
-			fmt.Println("There are administrators in the system. Please ask them to generate accounts as required")
+		_, err := queries.CheckOnAdministartor(context.Background())
+		if err == nil {
+			fmt.Printf("\nThere are curent administrators in the system. Please ask them for new account generation:\n")
 			return
 		}
 

@@ -57,7 +57,7 @@ SELECT id, name FROM users
 WHERE administrator = TRUE;
 
 -- name: DeleteUser :exec
-DELETE FROM users *
+DELETE FROM users 
 WHERE name = $1;
 
 -- name: UserOverview :many
