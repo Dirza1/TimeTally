@@ -38,9 +38,9 @@ jobs:
       - name: Make CLI executable
         run: chmod +x ./timetally
 
-      - name: Set DB environment variable
-        run: echo "DB_URL=postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable" >> $GITHUB_ENV
-      
+      - name: Copy .env.citest to .env
+        run: cp .env.citest .env
+
       - name: Wait for Postgres
         run: |
           until pg_isready -h localhost -p 5432 -U testuser -d testdb; do
