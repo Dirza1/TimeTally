@@ -33,7 +33,7 @@ jobs:
         run: go mod tidy
 
       - name: Build CLI
-        run: go build -o timetally ./cmd
+        run: go build -o timetally .
 
       - name: Make CLI executable
         run: chmod +x ./timetally
