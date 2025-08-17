@@ -180,6 +180,36 @@ Every quarter a CSV file backup is made of the three parts of the database aswel
 By default the backups are stored in the folder of the program.
 It is recomended to save the databases also on a stand alone device like a USB drive or in a protected cloud enviroment.
 
+### Restoring Backups
+
+If you ever need to restore your database from a backup, you can follow these steps:
+
+#### 1️⃣ Restore from a `.sql` backup
+1. Locate the `.sql` backup file, usually stored in the program folder or your chosen backup location.  
+2. Open a terminal and navigate to the directory containing the backup file.  
+3. Run the following command (replace placeholders with your values):  
+```bash
+psql -U <your_database_user> -d <database_name> -f <backup_file>.sql
+-U specifies your PostgreSQL username.
+
+-d specifies the database to restore into.
+
+<backup_file>.sql is the SQL file to import.
+```
+#### Restore from a quarterly CSV backup
+
+Open the CSV file(s) located in your backup folder.
+Use your database tool or a script to import the CSV into the corresponding tables.
+In PostgreSQL, you can use the COPY command:
+COPY <table_name> FROM '<path_to_csv_file>' DELIMITER ',' CSV HEADER;
+Replace <table_name> with the table you want to restore.
+Ensure the table structure matches the CSV format.
+
+**Important Notes**
+
+1. Always make sure the database is not actively used while restoring.
+2. Consider keeping a backup of the current database before performing a restore.
+3. If restoring to a different system, ensure PostgreSQL is installed and configured correctly.
 
 ## Closure words
 I hope you will find this program usefull.
