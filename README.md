@@ -168,6 +168,8 @@ You can also generate an overview of the available commands by typing:
 **TimeTally -h**
 It will show you a list of all available commands.
 
+## Automated backups
+
 ## Closure words
 I hope you will find this program usefull.
 Should you find any bugs, have any sugestions please let me know via: jasper.olthof@xs4all.nl
@@ -194,3 +196,4 @@ Generate Tests and then make you pull request.
 
 note: Your improvements may not be merged base on the creators ideas.
 If you want to make sure your improvements will be added, contact the creator prior to starting.
+
