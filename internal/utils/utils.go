@@ -134,7 +134,7 @@ func BackupProcess() {
 		fmt.Println("There was an error loading your latest backup times. To ensure the backup process runs as expected are made new backups will now be made")
 		BackupTimes = &Backup{
 			WeeklyBackUp:    CurrentTime.AddDate(0, 0, -14),
-			QuarterlyBackUp: CurrentTime.AddDate(0, -3, 0),
+			QuarterlyBackUp: CurrentTime.AddDate(0, -4, 0),
 		}
 	}
 	err = godotenv.Load(".env")
@@ -161,7 +161,7 @@ func BackupProcess() {
 
 		tables := []string{"users", "timeregistration", "Finances"}
 		for _, table := range tables {
-			csvFile := fmt.Sprintf("backups/Quarterly/Boekhouding_%s_%s.csv", table, time.Now().Format("2006-01-02"))
+			csvFile := fmt.Sprintf("backups/quarterly/Boekhouding_%s_%s.csv", table, time.Now().Format("2006-01-02"))
 			cmd := exec.Command("psql", dbURL, "-c", fmt.Sprintf("\\copy Boekhouding.%s TO '%s' CSV HEADER", table, csvFile))
 			err := cmd.Run()
 			if err != nil {
