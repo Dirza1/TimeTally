@@ -25,9 +25,10 @@ This is a widely used locally run database that is open source.
 Documentation on this database can be found here: [Postgresql.org](https://www.postgresql.org/)
 The easiest installation can be found here: [Install postgreSQL](https://www.w3schools.com/postgresql/postgresql_install.php)
 Note the following: You need to ensure you have the following data saved:
--Your password
--The port you will use
--The username you select
+- Your password
+- The port you will use
+- The username you select
+- The name of your database
 
 Complete the instructions in the "install" and "Get Started"sections of the website.
 You should continue until you have the screen which says: postgres=#
@@ -168,6 +169,18 @@ You can also generate an overview of the available commands by typing:
 **TimeTally -h**
 It will show you a list of all available commands.
 
+## Automated backups
+What would you do without automated backups.
+This prograam performed this check during a login command.
+It makes n automated backup of a flat sql file every week.
+Every quarter a CSV file backup is made of the three parts of the database aswel.
+
+**The user of the program is required to ensure these backups are saved on a safe place**
+
+By default the backups are stored in the folder of the program.
+It is recomended to save the databases also on a stand alone device like a USB drive or in a protected cloud enviroment.
+
+
 ## Closure words
 I hope you will find this program usefull.
 Should you find any bugs, have any sugestions please let me know via: jasper.olthof@xs4all.nl
@@ -194,3 +207,4 @@ Generate Tests and then make you pull request.
 
 note: Your improvements may not be merged base on the creators ideas.
 If you want to make sure your improvements will be added, contact the creator prior to starting.
+

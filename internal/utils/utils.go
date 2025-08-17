@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/Dirza1/TimeTally/internal/database"
@@ -19,6 +20,11 @@ type Session struct {
 	UserName string    `json:"user_name"`
 	UserID   uuid.UUID `json:"user_id"`
 	LastUsed time.Time `json:"last_used"`
+}
+
+type Backup struct {
+	WeeklyBackUp    time.Time `json:"weekly_back_up"`
+	QuarterlyBackUp time.Time `json:"quarterly_back_up"`
 }
 
 func DatabaseConnection() database.Queries {
@@ -106,4 +112,76 @@ func UpdateSession() {
 		fmt.Printf("\nError saving new session. Err:\n%s\n", err)
 		return
 	}
+}
+
+func LoadBackupTimes() (*Backup, error) {
+	data, err := os.ReadFile(".backups.json")
+	if err != nil {
+		return nil, err
+	}
+	var b Backup
+	err = json.Unmarshal(data, &b)
+	if err != nil {
+		return nil, err
+	}
+	return &b, nil
+}
+
+func BackupProcess() {
+	CurrentTime := time.Now()
+	BackupTimes, err := LoadBackupTimes()
+	if err != nil {
+		fmt.Println("There was an error loading your latest backup times. To ensure the backup process runs as expected new backups will now be made")
+		BackupTimes = &Backup{
+			WeeklyBackUp:    CurrentTime.AddDate(0, 0, -14),
+			QuarterlyBackUp: CurrentTime.AddDate(0, -4, 0),
+		}
+	}
+	err = godotenv.Load(".env")
+	if err != nil {
+		fmt.Printf("Error loading enviromental variables")
+		return
+	}
+	dbURL := os.Getenv("DB_URL")
+
+	if CurrentTime.Sub(BackupTimes.WeeklyBackUp) > 7*24*time.Hour {
+		fmt.Println("creating a new weekly backup file. This may take a while.")
+		backupFile := fmt.Sprintf("backups/weekly/db_%s.sql", time.Now().Format("2006-01-02_150405"))
+		cmd := exec.Command("pg_dump", dbURL, "-F", "p", "-f", backupFile)
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("Backup failed:", err)
+			return
+		} else {
+			fmt.Println("Backup saved to", backupFile)
+		}
+		BackupTimes.WeeklyBackUp = time.Now()
+	}
+	if CurrentTime.Sub(BackupTimes.QuarterlyBackUp) > 91*24*time.Hour {
+		fmt.Println("Creaating a new quarterly csv file. This may  take a while.")
+		tables := []string{"users", "timeregistration", "Finances"}
+		for _, table := range tables {
+			csvFile := fmt.Sprintf("backups/quarterly/Boekhouding_%s_%s.csv", table, time.Now().Format("2006-01-02"))
+			cmd := exec.Command("psql", dbURL, "-c", fmt.Sprintf("\\copy %s TO '%s' CSV HEADER", table, csvFile))
+			err := cmd.Run()
+			if err != nil {
+				fmt.Println("CSV backup failed for table", table, ":", err)
+				return
+			} else {
+				fmt.Println("CSV backup created:", csvFile)
+			}
+
+		}
+		BackupTimes.QuarterlyBackUp = time.Now()
+
+	}
+	SaveNewBackupTimes(BackupTimes)
+}
+
+func SaveNewBackupTimes(b *Backup) error {
+	data, err := json.MarshalIndent(b, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(".backups.json", data, 0600)
 }
