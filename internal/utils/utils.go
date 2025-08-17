@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/Dirza1/TimeTally/internal/database"
@@ -130,11 +131,57 @@ func BackupProcess() {
 	CurrentTime := time.Now()
 	BackupTimes, err := LoadBackupTimes()
 	if err != nil {
-		fmt.Println("There was an error loading your latest backup times. To ensure backups are made new backups will now be made")
+		fmt.Println("There was an error loading your latest backup times. To ensure the backup process runs as expected are made new backups will now be made")
 		BackupTimes = &Backup{
 			WeeklyBackUp:    CurrentTime.AddDate(0, 0, -14),
 			QuarterlyBackUp: CurrentTime.AddDate(0, -3, 0),
 		}
 	}
+	err = godotenv.Load(".env")
+	if err != nil {
+		fmt.Printf("Error loading enviromental variables")
+		return
+	}
+	dbURL := os.Getenv("DB_URL")
 
+	if CurrentTime.Sub(BackupTimes.WeeklyBackUp) > 7*24*time.Hour {
+
+		backupFile := fmt.Sprintf("backups/weekly/db_%s.sql", time.Now().Format("2006-01-02_150405"))
+		cmd := exec.Command("pg_dump", dbURL, "-F", "p", "-f", backupFile)
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("Backup failed:", err)
+			return
+		} else {
+			fmt.Println("Backup saved to", backupFile)
+		}
+		BackupTimes.WeeklyBackUp = time.Now()
+	}
+	if CurrentTime.Sub(BackupTimes.QuarterlyBackUp) > 91*24*time.Hour {
+
+		tables := []string{"users", "timeregistration", "Finances"}
+		for _, table := range tables {
+			csvFile := fmt.Sprintf("backups/Quarterly/Boekhouding_%s_%s.csv", table, time.Now().Format("2006-01-02"))
+			cmd := exec.Command("psql", dbURL, "-c", fmt.Sprintf("\\copy Boekhouding.%s TO '%s' CSV HEADER", table, csvFile))
+			err := cmd.Run()
+			if err != nil {
+				fmt.Println("CSV backup failed for table", table, ":", err)
+				return
+			} else {
+				fmt.Println("CSV backup created:", csvFile)
+			}
+
+		}
+		BackupTimes.QuarterlyBackUp = time.Now()
+
+	}
+	SaveNewBackupTimes(BackupTimes)
+}
+
+func SaveNewBackupTimes(b *Backup) error {
+	data, err := json.MarshalIndent(b, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(".backups.json", data, 0600)
 }

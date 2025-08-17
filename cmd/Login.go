@@ -53,6 +53,7 @@ var LoginCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		fmt.Println("Login Successful")
+		utils.BackupProcess()
 	},
 }
 
