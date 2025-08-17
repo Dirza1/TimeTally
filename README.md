@@ -184,7 +184,7 @@ It is recomended to save the databases also on a stand alone device like a USB d
 
 If you ever need to restore your database from a backup, you can follow these steps:
 
-#### 1️⃣ Restore from a `.sql` backup
+#### Restore from a `.sql` backup
 1. Locate the `.sql` backup file, usually stored in the program folder or your chosen backup location.  
 2. Open a terminal and navigate to the directory containing the backup file.  
 3. Run the following command (replace placeholders with your values):  
