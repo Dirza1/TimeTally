@@ -170,6 +170,16 @@ You can also generate an overview of the available commands by typing:
 It will show you a list of all available commands.
 
 ## Automated backups
+What would you do without automated backups.
+This prograam performed this check during a login command.
+It makes n automated backup of a flat sql file every week.
+Every quarter a CSV file backup is made of the three parts of the database aswel.
+
+**The user of the program is required to ensure these backups are saved on a safe place**
+
+By default the backups are stored in the folder of the program.
+It is recomended to save the databases also on a stand alone device like a USB drive or in a protected cloud enviroment.
+
 
 ## Closure words
 I hope you will find this program usefull.
