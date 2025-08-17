@@ -131,7 +131,7 @@ func BackupProcess() {
 	CurrentTime := time.Now()
 	BackupTimes, err := LoadBackupTimes()
 	if err != nil {
-		fmt.Println("There was an error loading your latest backup times. To ensure the backup process runs as expected are made new backups will now be made")
+		fmt.Println("There was an error loading your latest backup times. To ensure the backup process runs as expected new backups will now be made")
 		BackupTimes = &Backup{
 			WeeklyBackUp:    CurrentTime.AddDate(0, 0, -14),
 			QuarterlyBackUp: CurrentTime.AddDate(0, -4, 0),
@@ -145,7 +145,7 @@ func BackupProcess() {
 	dbURL := os.Getenv("DB_URL")
 
 	if CurrentTime.Sub(BackupTimes.WeeklyBackUp) > 7*24*time.Hour {
-
+		fmt.Println("creating a new weekly backup file. This may take a while.")
 		backupFile := fmt.Sprintf("backups/weekly/db_%s.sql", time.Now().Format("2006-01-02_150405"))
 		cmd := exec.Command("pg_dump", dbURL, "-F", "p", "-f", backupFile)
 		err = cmd.Run()
@@ -158,11 +158,11 @@ func BackupProcess() {
 		BackupTimes.WeeklyBackUp = time.Now()
 	}
 	if CurrentTime.Sub(BackupTimes.QuarterlyBackUp) > 91*24*time.Hour {
-
+		fmt.Println("Creaating a new quarterly csv file. This may  take a while.")
 		tables := []string{"users", "timeregistration", "Finances"}
 		for _, table := range tables {
 			csvFile := fmt.Sprintf("backups/quarterly/Boekhouding_%s_%s.csv", table, time.Now().Format("2006-01-02"))
-			cmd := exec.Command("psql", dbURL, "-c", fmt.Sprintf("\\copy Boekhouding.%s TO '%s' CSV HEADER", table, csvFile))
+			cmd := exec.Command("psql", dbURL, "-c", fmt.Sprintf("\\copy %s TO '%s' CSV HEADER", table, csvFile))
 			err := cmd.Run()
 			if err != nil {
 				fmt.Println("CSV backup failed for table", table, ":", err)
