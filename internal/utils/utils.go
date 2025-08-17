@@ -21,6 +21,11 @@ type Session struct {
 	LastUsed time.Time `json:"last_used"`
 }
 
+type Backup struct {
+	WeeklyBackUp    time.Time `json:"weekly_back_up"`
+	QuarterlyBackUp time.Time `json:"quarterly_back_up"`
+}
+
 func DatabaseConnection() database.Queries {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -106,4 +111,30 @@ func UpdateSession() {
 		fmt.Printf("\nError saving new session. Err:\n%s\n", err)
 		return
 	}
+}
+
+func LoadBackupTimes() (*Backup, error) {
+	data, err := os.ReadFile(".backups.json")
+	if err != nil {
+		return nil, err
+	}
+	var b Backup
+	err = json.Unmarshal(data, &b)
+	if err != nil {
+		return nil, err
+	}
+	return &b, nil
+}
+
+func BackupProcess() {
+	CurrentTime := time.Now()
+	BackupTimes, err := LoadBackupTimes()
+	if err != nil {
+		fmt.Println("There was an error loading your latest backup times. To ensure backups are made new backups will now be made")
+		BackupTimes = &Backup{
+			WeeklyBackUp:    CurrentTime.AddDate(0, 0, -14),
+			QuarterlyBackUp: CurrentTime.AddDate(0, -3, 0),
+		}
+	}
+
 }

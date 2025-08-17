@@ -25,9 +25,10 @@ This is a widely used locally run database that is open source.
 Documentation on this database can be found here: [Postgresql.org](https://www.postgresql.org/)
 The easiest installation can be found here: [Install postgreSQL](https://www.w3schools.com/postgresql/postgresql_install.php)
 Note the following: You need to ensure you have the following data saved:
--Your password
--The port you will use
--The username you select
+- Your password
+- The port you will use
+- The username you select
+- The name of your database
 
 Complete the instructions in the "install" and "Get Started"sections of the website.
 You should continue until you have the screen which says: postgres=#
